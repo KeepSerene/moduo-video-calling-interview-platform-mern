@@ -1,9 +1,12 @@
 import express from "express";
+import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
 import ENV from "./lib/env.js";
 import { connectToDB } from "./lib/db.js";
+import { serve } from "inngest/express";
+import { functions, inngest } from "./lib/inngest.js";
 
 const app = express();
 
@@ -13,6 +16,9 @@ const __dirname = dirname(__filename);
 
 // Middleware to parse JSON (needed for POST requests)
 app.use(express.json());
+app.use(cors({ origin: ENV.CLIENT_URL, credentials: true }));
+
+app.use("/api/inngest", serve({ client: inngest, functions }));
 
 // API routes should come BEFORE static file serving
 app.get("/api/test", (req, res) => {
