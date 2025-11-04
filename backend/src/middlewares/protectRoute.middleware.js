@@ -5,7 +5,7 @@ const protectedRoutesHandlers = [
   requireAuth(),
   async (req, res, next) => {
     try {
-      const { clerkId } = req.auth().userId;
+      const clerkId = req.auth().userId;
 
       if (!clerkId)
         return res
