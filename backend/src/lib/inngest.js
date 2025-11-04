@@ -26,7 +26,7 @@ const syncUser = inngest.createFunction(
       await upsertStreamUser({
         id: newUser.clerkId.toString(),
         name: newUser.name,
-        avatarUrl: newUser.profileImageUrl,
+        image: newUser.profileImageUrl,
       });
     } catch (error) {
       console.error("Error running the Inngest syncUser function:", error);
