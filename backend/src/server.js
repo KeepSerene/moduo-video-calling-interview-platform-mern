@@ -14,10 +14,9 @@ const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// Middleware to parse JSON (needed for POST requests)
+// Middlewares
 app.use(express.json());
 app.use(cors({ origin: ENV.CLIENT_URL, credentials: true }));
-
 app.use("/api/inngest", serve({ client: inngest, functions }));
 
 // API routes should come BEFORE static file serving
