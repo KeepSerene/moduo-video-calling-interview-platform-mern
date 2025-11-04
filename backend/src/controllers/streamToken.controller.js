@@ -18,7 +18,7 @@ export async function handleStreamToken(req, res) {
       userAvatarUrl: req.user.image,
     });
   } catch (error) {
-    console.error("Stream token handler error:", error);
+    console.error("Stream token handler error:", error.message);
 
     return res.status(500).json({ message: "Internal Server Error!" });
   }

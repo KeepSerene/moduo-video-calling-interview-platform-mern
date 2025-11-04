@@ -9,6 +9,7 @@ import { serve } from "inngest/express";
 import { functions, inngest } from "./lib/inngest.js";
 import { clerkMiddleware } from "@clerk/express";
 import chatsRouter from "./routes/chats.route.js";
+import sessionsRouter from "./routes/sessions.route.js";
 
 const app = express();
 
@@ -23,9 +24,10 @@ app.use("/api/inngest", serve({ client: inngest, functions }));
 app.use(clerkMiddleware()); // makes `req.auth()` accessible
 
 app.use("/api/chats", chatsRouter);
+app.use("/api/sessions", sessionsRouter);
 
 // API routes should come BEFORE static file serving
-app.get("/api/test", (req, res) => {
+app.get("/api/test", (_, res) => {
   res.status(200).json({ msg: "Hello from the test server!" });
 });
 
@@ -36,7 +38,7 @@ if (ENV.NODE_ENV === "production") {
 
   // catch-all route: for any route not matched above, serve index.html
   // allows React Router to handle routing on the client side
-  app.get("/{*any}", (req, res) => {
+  app.get("/{*any}", (_, res) => {
     res.sendFile(path.join(__dirname, "../../frontend/dist/index.html"));
   });
 }
