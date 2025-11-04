@@ -7,6 +7,8 @@ import ENV from "./lib/env.js";
 import { connectToDB } from "./lib/db.js";
 import { serve } from "inngest/express";
 import { functions, inngest } from "./lib/inngest.js";
+import { clerkMiddleware } from "@clerk/express";
+import chatsRouter from "./routes/chats.route.js";
 
 const app = express();
 
@@ -18,11 +20,13 @@ const __dirname = dirname(__filename);
 app.use(express.json());
 app.use(cors({ origin: ENV.CLIENT_URL, credentials: true }));
 app.use("/api/inngest", serve({ client: inngest, functions }));
+app.use(clerkMiddleware()); // makes `req.auth` accessible
 
 // API routes should come BEFORE static file serving
 app.get("/api/test", (req, res) => {
   res.status(200).json({ msg: "Hello from the test server!" });
 });
+app.get("/api/chats", chatsRouter);
 
 // In production, serve the React app
 if (ENV.NODE_ENV === "production") {
