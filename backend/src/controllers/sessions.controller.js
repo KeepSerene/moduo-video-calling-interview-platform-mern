@@ -8,7 +8,7 @@ export async function handleCreateSession(req, res) {
     const clerkUserId = req.user.clerkId; // user's Clerk ID
 
     if (!problemTitle || !difficulty) {
-      res
+      return res
         .status(400)
         .json({ message: "Problem title and/or difficulty are/is required!" });
     }
@@ -116,8 +116,20 @@ export async function handleJoinSession(req, res) {
       return res.status(404).json({ message: "Session Not Found!" });
     }
 
+    if (session.status !== "active") {
+      return res
+        .status(400)
+        .json({ message: "Cannot join a completed session!" });
+    }
+
     if (session.participantId) {
-      return res.status(400).json({ message: "Session is already full!" });
+      return res.status(409).json({ message: "Session is already full!" });
+    }
+
+    if (session.hostId.toString() === dbUserId.toString()) {
+      return res.status(400).json({
+        message: "Hosts cannot join their sessions as a participant!",
+      });
     }
 
     // Make the user a participant of the intended session
@@ -147,7 +159,7 @@ export async function handleEndSession(req, res) {
       return res.status(404).json({ message: "Session Not Found!" });
     }
 
-    if (session.hostId.toString() === dbUserId.toString()) {
+    if (session.hostId.toString() !== dbUserId.toString()) {
       return res.status(403).json({ message: "Only hosts can end sessions!" });
     }
 
@@ -155,15 +167,16 @@ export async function handleEndSession(req, res) {
       return res.status(400).json({ message: "Session is already completed!" });
     }
 
-    session.status = "completed";
-    await session.save();
-
     // Delete the session video call and the chat channel
     const videoCall = streamClient.video.call("default", session.callId);
     await videoCall.delete({ hard: true });
 
     const channel = chatClient.channel("messaging", session.callId);
     await channel.delete({ hard_delete: true });
+
+    // Mark the session as completed
+    session.status = "completed";
+    await session.save();
 
     return res
       .status(200)

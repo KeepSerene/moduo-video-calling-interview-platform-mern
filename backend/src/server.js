@@ -9,7 +9,7 @@ import { serve } from "inngest/express";
 import { functions, inngest } from "./lib/inngest.js";
 import { clerkMiddleware } from "@clerk/express";
 import chatsRouter from "./routes/chats.route.js";
-import sessionsRouter from "./routes/chats.route.js";
+import sessionsRouter from "./routes/sessions.route.js";
 
 const app = express();
 
