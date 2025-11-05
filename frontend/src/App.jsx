@@ -1,25 +1,17 @@
-import "./App.css";
-import {
-  SignedIn,
-  SignedOut,
-  SignInButton,
-  SignOutButton,
-  UserButton,
-} from "@clerk/clerk-react";
+import { Routes, Route } from "react-router";
+import HomePage from "./pages/HomePage";
+import ProblemsPage from "./pages/ProblemsPage";
+import { Toaster } from "react-hot-toast";
 
 function App() {
   return (
     <>
-      <h1>Welcome to Moduo</h1>
+      <Routes>
+        <Route index element={<HomePage />} />
+        <Route path="/problems" element={<ProblemsPage />} />
+      </Routes>
 
-      <SignedOut>
-        <SignInButton mode="modal" />
-      </SignedOut>
-
-      <SignedIn>
-        <UserButton />
-        <SignOutButton />
-      </SignedIn>
+      <Toaster toastOptions={{ duration: 3000 }} />
     </>
   );
 }
