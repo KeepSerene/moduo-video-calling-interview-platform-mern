@@ -1,14 +1,36 @@
 import { Routes, Route } from "react-router";
-import HomePage from "./pages/HomePage";
-import ProblemsPage from "./pages/ProblemsPage";
+import { ProtectedRoute, PublicRoute } from "./routes";
+import { DashboardPage, HomePage, ProblemsPage } from "./pages";
 import { Toaster } from "react-hot-toast";
 
 function App() {
   return (
     <>
       <Routes>
-        <Route index element={<HomePage />} />
-        <Route path="/problems" element={<ProblemsPage />} />
+        <Route
+          index
+          element={
+            <PublicRoute>
+              <HomePage />
+            </PublicRoute>
+          }
+        />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <DashboardPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/problems"
+          element={
+            <ProtectedRoute>
+              <ProblemsPage />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
 
       <Toaster toastOptions={{ duration: 3000 }} />
