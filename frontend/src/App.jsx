@@ -1,6 +1,11 @@
 import { Routes, Route } from "react-router";
 import { ProtectedRoute, PublicRoute } from "./routes";
-import { DashboardPage, HomePage, ProblemsPage } from "./pages";
+import {
+  DashboardPage,
+  HomePage,
+  ProblemDetailsPage,
+  ProblemsPage,
+} from "./pages";
 import { Toaster } from "react-hot-toast";
 
 function App() {
@@ -28,6 +33,14 @@ function App() {
           element={
             <ProtectedRoute>
               <ProblemsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/problems/:problemId"
+          element={
+            <ProtectedRoute>
+              <ProblemDetailsPage />
             </ProtectedRoute>
           }
         />

@@ -15,7 +15,8 @@ html {
 }
 
 body {
-  @apply text-base-content font-sans selection:bg-primary/20 selection:text-base-content;
+  @apply bg-base-100 font-sans text-base-content text-base;
+  @apply selection:bg-primary/20 selection:text-base-content;
 
   scrollbar-width: thin;
 }
