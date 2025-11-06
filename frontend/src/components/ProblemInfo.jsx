@@ -3,7 +3,6 @@ import { Lightbulb, Clock, Database } from "lucide-react";
 
 function ProblemInfo({ problemId, problem, onProblemChange, allProblems }) {
   const {
-    id,
     title,
     category,
     difficulty,
