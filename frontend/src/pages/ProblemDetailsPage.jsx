@@ -17,10 +17,17 @@ function ProblemDetailsPage() {
   const { problemId } = useParams();
   const navigate = useNavigate();
 
+  // Early redirect if invalid problem ID
+  useEffect(() => {
+    if (!PROBLEMS[problemId]) {
+      navigate("/problems/two-sum");
+    }
+  }, [problemId, navigate]);
+
   const [currentProblemId, setCurrentProblemId] = useState(problemId);
   const [selectedLanguage, setSelectedLanguage] = useState("javascript");
   const [userCode, setUserCode] = useState(
-    PROBLEMS[problemId].starterCode.javascript
+    PROBLEMS[problemId]?.starterCode?.javascript || ""
   );
   const [isRunning, setIsRunning] = useState(false);
   const [codeRunResult, setCodeRunResult] = useState(null);

@@ -33,7 +33,7 @@ export function normalize(input) {
         .replace(/\[\s+/g, "[")
         .replace(/\s+\]/g, "]")
         // normalize spaces around commas to single space after comma
-        .replace(/\s*,\s*/g, ",")
+        .replace(/\s*,\s*/g, ", ")
     )
     .filter((line) => line.length > 0)
     .join("\n");

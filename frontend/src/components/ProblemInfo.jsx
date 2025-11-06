@@ -42,7 +42,7 @@ function ProblemInfo({ problemId, problem, onProblemChange, allProblems }) {
             className="select select-sm w-full max-w-full"
           >
             {allProblems.map((problem) => (
-              <option key={problem.id} value={problem.id} defaultValue={id}>
+              <option key={problem.id} value={problem.id}>
                 {problem.title} &mdash; {problem.difficulty}
               </option>
             ))}
