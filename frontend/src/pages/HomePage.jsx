@@ -15,17 +15,17 @@ const stats = [
   {
     figure: "10K+",
     text: "Active users",
-    colorClassName: "primary",
+    colorClassName: "text-primary",
   },
   {
     figure: "50K+",
     text: "Sessions",
-    colorClassName: "secondary",
+    colorClassName: "text-secondary",
   },
   {
     figure: "99.9%",
     text: "Uptime",
-    colorClassName: "accent",
+    colorClassName: "text-accent",
   },
 ];
 
@@ -138,9 +138,7 @@ const HomePage = () => (
           <ul className="bg-base-100 shadow-xl stats stats-vertical lg:stats-horizontal">
             {stats.map(({ figure, text, colorClassName }) => (
               <li key={text} className="stat">
-                <span className={`stat-value text-${colorClassName}`}>
-                  {figure}
-                </span>
+                <span className={`stat-value ${colorClassName}`}>{figure}</span>
                 <span className="stat-title capitalize">{text}</span>
               </li>
             ))}
