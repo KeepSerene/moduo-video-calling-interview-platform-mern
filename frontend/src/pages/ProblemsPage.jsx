@@ -82,7 +82,7 @@ function ProblemsPage() {
                             <span
                               className={`badge ${getDifficultyBadgeClassName(
                                 difficulty
-                              )} max-sm:badge-sm`}
+                              )} font-medium max-sm:badge-sm`}
                             >
                               {difficulty}
                             </span>

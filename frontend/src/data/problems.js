@@ -20,10 +20,12 @@ export const PROBLEMS = {
       {
         input: "nums = [3,2,4], target = 6",
         output: "[1,2]",
+        explanation: "Because nums[1] + nums[2] == 6, we return [1, 2].",
       },
       {
         input: "nums = [3,3], target = 6",
         output: "[0,1]",
+        explanation: "Because nums[0] + nums[1] == 6, we return [0, 1].",
       },
     ],
     constraints: [
@@ -39,9 +41,9 @@ export const PROBLEMS = {
 }
 
 // Test cases
-console.log(twoSum([2, 7, 11, 15], 9)); // Expected: [0, 1]
-console.log(twoSum([3, 2, 4], 6)); // Expected: [1, 2]
-console.log(twoSum([3, 3], 6)); // Expected: [0, 1]`,
+console.log(JSON.stringify(twoSum([2, 7, 11, 15], 9))); // Expected: [0,1]
+console.log(JSON.stringify(twoSum([3, 2, 4], 6))); // Expected: [1,2]
+console.log(JSON.stringify(twoSum([3, 3], 6))); // Expected: [0,1]`,
       python: `def twoSum(nums, target):
     # Write your solution here
     pass
@@ -71,6 +73,13 @@ class Solution {
       python: "[0, 1]\n[1, 2]\n[0, 1]",
       java: "[0, 1]\n[1, 2]\n[0, 1]",
     },
+    hints: [
+      "A simple approach is to use two nested loops to check every pair of numbers.",
+      "Can you solve it in O(n) time? Think about using a hash table to store numbers you've seen.",
+      "For each number, check if (target - current number) exists in your hash table.",
+    ],
+    timeComplexity: "O(n)",
+    spaceComplexity: "O(n)",
   },
 
   "reverse-string": {
@@ -88,13 +97,15 @@ class Solution {
       {
         input: 's = ["h","e","l","l","o"]',
         output: '["o","l","l","e","h"]',
+        explanation: "Reverse the array of characters in-place.",
       },
       {
         input: 's = ["H","a","n","n","a","h"]',
         output: '["h","a","n","n","a","H"]',
+        explanation: "Reverse the array of characters in-place.",
       },
     ],
-    constraints: ["1 ≤ s.length ≤ 10⁵", "s[i] is a printable ascii character"],
+    constraints: ["1 ≤ s.length ≤ 10⁵", "s[i] is a printable ASCII character"],
     starterCode: {
       javascript: `function reverseString(s) {
   // Write your solution here
@@ -104,11 +115,11 @@ class Solution {
 // Test cases
 let test1 = ["h","e","l","l","o"];
 reverseString(test1);
-console.log(test1); // Expected: ["o","l","l","e","h"]
+console.log(JSON.stringify(test1)); // Expected: ["o","l","l","e","h"]
 
 let test2 = ["H","a","n","n","a","h"];
 reverseString(test2);
-console.log(test2); // Expected: ["h","a","n","n","a","H"]`,
+console.log(JSON.stringify(test2)); // Expected: ["h","a","n","n","a","H"]`,
       python: `def reverseString(s):
     # Write your solution here
     pass
@@ -116,11 +127,11 @@ console.log(test2); // Expected: ["h","a","n","n","a","H"]`,
 # Test cases
 test1 = ["h","e","l","l","o"]
 reverseString(test1)
-print(test1)  # Expected: ["o","l","l","e","h"]
+print(test1)  # Expected: ['o', 'l', 'l', 'e', 'h']
 
 test2 = ["H","a","n","n","a","h"]
 reverseString(test2)
-print(test2)  # Expected: ["h","a","n","n","a","H"]`,
+print(test2)  # Expected: ['h', 'a', 'n', 'n', 'a', 'H']`,
       java: `import java.util.*;
 
 class Solution {
@@ -145,6 +156,13 @@ class Solution {
       python: "['o', 'l', 'l', 'e', 'h']\n['h', 'a', 'n', 'n', 'a', 'H']",
       java: "[o, l, l, e, h]\n[h, a, n, n, a, H]",
     },
+    hints: [
+      "Use the two-pointer technique with one pointer at the start and one at the end.",
+      "Swap characters and move pointers toward the center.",
+      "Remember to modify the array in-place without using extra space.",
+    ],
+    timeComplexity: "O(n)",
+    spaceComplexity: "O(1)",
   },
 
   "valid-palindrome": {
@@ -177,7 +195,7 @@ class Solution {
       },
     ],
     constraints: [
-      "1 ≤ s.length ≤ 2 * 10⁵",
+      "1 ≤ s.length ≤ 2 × 10⁵",
       "s consists only of printable ASCII characters",
     ],
     starterCode: {
@@ -217,6 +235,13 @@ print(isPalindrome(" "))  # Expected: True`,
       python: "True\nFalse\nTrue",
       java: "true\nfalse\ntrue",
     },
+    hints: [
+      "First, clean the string by removing non-alphanumeric characters and converting to lowercase.",
+      "Use two pointers, one at the start and one at the end, to compare characters.",
+      "Alternatively, you can clean the string and compare it with its reverse.",
+    ],
+    timeComplexity: "O(n)",
+    spaceComplexity: "O(1) with two pointers, O(n) if creating cleaned string",
   },
 
   "maximum-subarray": {
@@ -226,7 +251,7 @@ print(isPalindrome(" "))  # Expected: True`,
     category: "Array • Dynamic Programming",
     description: {
       text: "Given an integer array nums, find the subarray with the largest sum, and return its sum.",
-      notes: [],
+      notes: ["A subarray is a contiguous part of an array."],
     },
     examples: [
       {
@@ -283,6 +308,13 @@ print(maxSubArray([5,4,-1,7,8]))  # Expected: 23`,
       python: "6\n1\n23",
       java: "6\n1\n23",
     },
+    hints: [
+      "Think about dynamic programming: what information do you need to track at each position?",
+      "Kadane's algorithm is an efficient approach - keep track of the maximum sum ending at the current position.",
+      "At each position, decide whether to extend the existing subarray or start a new one.",
+    ],
+    timeComplexity: "O(n)",
+    spaceComplexity: "O(1)",
   },
 
   "container-with-most-water": {
@@ -303,11 +335,12 @@ print(maxSubArray([5,4,-1,7,8]))  # Expected: 23`,
         input: "height = [1,8,6,2,5,4,8,3,7]",
         output: "49",
         explanation:
-          "The vertical lines are represented by array [1,8,6,2,5,4,8,3,7]. In this case, the max area of water the container can contain is 49.",
+          "The vertical lines are represented by array [1,8,6,2,5,4,8,3,7]. The max area is obtained with heights at indices 1 and 8: min(8,7) × (8-1) = 7 × 7 = 49.",
       },
       {
         input: "height = [1,1]",
         output: "1",
+        explanation: "The max area is 1 × 1 = 1.",
       },
     ],
     constraints: ["n == height.length", "2 ≤ n ≤ 10⁵", "0 ≤ height[i] ≤ 10⁴"],
@@ -345,6 +378,13 @@ print(maxArea([1,1]))  # Expected: 1`,
       python: "49\n1",
       java: "49\n1",
     },
+    hints: [
+      "The area is determined by the shorter line and the distance between the two lines.",
+      "Use two pointers starting from both ends of the array.",
+      "Move the pointer pointing to the shorter line inward - why? Because moving the taller line won't increase the area.",
+    ],
+    timeComplexity: "O(n)",
+    spaceComplexity: "O(1)",
   },
 
   "merge-k-sorted-lists": {
@@ -353,10 +393,10 @@ print(maxArea([1,1]))  # Expected: 1`,
     difficulty: "Hard",
     category: "Linked List • Divide and Conquer • Heap (Priority Queue)",
     description: {
-      text: "You are given an array of k linked-lists lists, each linked-list is sorted in ascending order. Merge all the linked-lists into one sorted linked-list and return it.",
+      text: "You are given an array of k linked-lists, each linked-list is sorted in ascending order. Merge all the linked-lists into one sorted linked-list and return it.",
       notes: [
         "Each linked list is sorted in ascending order.",
-        "Try to analyze and optimize the time complexity.",
+        "Analyze and optimize the time complexity.",
       ],
     },
     examples: [
@@ -364,15 +404,17 @@ print(maxArea([1,1]))  # Expected: 1`,
         input: "lists = [[1,4,5],[1,3,4],[2,6]]",
         output: "[1,1,2,3,4,4,5,6]",
         explanation:
-          "The linked lists are:\n[1->4->5], [1->3->4], [2->6]\nMerging them results in [1->1->2->3->4->4->5->6].",
+          "The linked lists are:\n[\n  1→4→5,\n  1→3→4,\n  2→6\n]\nMerging them into one sorted list: 1→1→2→3→4→4→5→6",
       },
       {
         input: "lists = []",
         output: "[]",
+        explanation: "No lists to merge, return empty list.",
       },
       {
         input: "lists = [[]]",
         output: "[]",
+        explanation: "Single empty list, return empty list.",
       },
     ],
     constraints: [
@@ -380,6 +422,8 @@ print(maxArea([1,1]))  # Expected: 1`,
       "0 ≤ k ≤ 10⁴",
       "0 ≤ lists[i].length ≤ 500",
       "-10⁴ ≤ lists[i][j] ≤ 10⁴",
+      "lists[i] is sorted in ascending order",
+      "The sum of lists[i].length will not exceed 10⁴",
     ],
     starterCode: {
       javascript: `class ListNode {
@@ -394,8 +438,9 @@ function mergeKLists(lists) {
   
 }
 
-// Helper function to convert arrays to linked lists for testing
+// Helper functions for testing
 function arrayToList(arr) {
+  if (!arr || arr.length === 0) return null;
   const dummy = new ListNode();
   let current = dummy;
   for (const val of arr) {
@@ -405,15 +450,24 @@ function arrayToList(arr) {
   return dummy.next;
 }
 
+function listToArray(head) {
+  const result = [];
+  while (head) {
+    result.push(head.val);
+    head = head.next;
+  }
+  return result;
+}
+
 // Test cases
 const lists1 = [arrayToList([1,4,5]), arrayToList([1,3,4]), arrayToList([2,6])];
-console.log(mergeKLists(lists1)); // Expected: [1,1,2,3,4,4,5,6]
+console.log(JSON.stringify(listToArray(mergeKLists(lists1)))); // Expected: [1,1,2,3,4,4,5,6]
 
 const lists2 = [];
-console.log(mergeKLists(lists2)); // Expected: []
+console.log(JSON.stringify(listToArray(mergeKLists(lists2)))); // Expected: []
 
 const lists3 = [arrayToList([])];
-console.log(mergeKLists(lists3)); // Expected: []`,
+console.log(JSON.stringify(listToArray(mergeKLists(lists3)))); // Expected: []`,
       python: `class ListNode:
     def __init__(self, val=0, next=None):
         self.val = val
@@ -423,8 +477,10 @@ def mergeKLists(lists):
     # Write your solution here
     pass
 
-# Helper function to convert arrays to linked lists for testing
+# Helper functions for testing
 def array_to_list(arr):
+    if not arr:
+        return None
     dummy = ListNode()
     curr = dummy
     for val in arr:
@@ -432,15 +488,22 @@ def array_to_list(arr):
         curr = curr.next
     return dummy.next
 
+def list_to_array(head):
+    result = []
+    while head:
+        result.append(head.val)
+        head = head.next
+    return result
+
 # Test cases
 lists1 = [array_to_list([1,4,5]), array_to_list([1,3,4]), array_to_list([2,6])]
-print(mergeKLists(lists1))  # Expected: [1,1,2,3,4,4,5,6]
+print(list_to_array(mergeKLists(lists1)))  # Expected: [1,1,2,3,4,4,5,6]
 
 lists2 = []
-print(mergeKLists(lists2))  # Expected: []
+print(list_to_array(mergeKLists(lists2)))  # Expected: []
 
 lists3 = [array_to_list([])]
-print(mergeKLists(lists3))  # Expected: []`,
+print(list_to_array(mergeKLists(lists3)))  # Expected: []`,
       java: `import java.util.*;
 
 class ListNode {
@@ -457,39 +520,75 @@ class Solution {
         
         return null;
     }
+    
+    // Helper functions for testing
+    public static ListNode arrayToList(int[] arr) {
+        if (arr == null || arr.length == 0) return null;
+        ListNode dummy = new ListNode();
+        ListNode curr = dummy;
+        for (int val : arr) {
+            curr.next = new ListNode(val);
+            curr = curr.next;
+        }
+        return dummy.next;
+    }
+    
+    public static String listToString(ListNode head) {
+        List<Integer> result = new ArrayList<>();
+        while (head != null) {
+            result.add(head.val);
+            head = head.next;
+        }
+        return result.toString();
+    }
 
     public static void main(String[] args) {
-        // Helper function to create linked lists
-        ListNode l1 = new ListNode(1, new ListNode(4, new ListNode(5)));
-        ListNode l2 = new ListNode(1, new ListNode(3, new ListNode(4)));
-        ListNode l3 = new ListNode(2, new ListNode(6));
-        ListNode[] lists1 = { l1, l2, l3 };
-        System.out.println(mergeKLists(lists1)); // Expected: [1,1,2,3,4,4,5,6]
+        ListNode l1 = arrayToList(new int[]{1,4,5});
+        ListNode l2 = arrayToList(new int[]{1,3,4});
+        ListNode l3 = arrayToList(new int[]{2,6});
+        ListNode[] lists1 = {l1, l2, l3};
+        System.out.println(listToString(mergeKLists(lists1))); // Expected: [1, 1, 2, 3, 4, 4, 5, 6]
+        
+        ListNode[] lists2 = {};
+        System.out.println(listToString(mergeKLists(lists2))); // Expected: []
+        
+        ListNode[] lists3 = {null};
+        System.out.println(listToString(mergeKLists(lists3))); // Expected: []
     }
 }`,
     },
     expectedOutput: {
       javascript: "[1,1,2,3,4,4,5,6]\n[]\n[]",
-      python: "[1,1,2,3,4,4,5,6]\n[]\n[]",
-      java: "[1,1,2,3,4,4,5,6]\n[]\n[]",
+      python: "[1, 1, 2, 3, 4, 4, 5, 6]\n[]\n[]",
+      java: "[1, 1, 2, 3, 4, 4, 5, 6]\n[]\n[]",
     },
+    hints: [
+      "Brute force: Collect all values, sort them, and create a new linked list. What's the time complexity?",
+      "Can you merge the lists one by one? Start by merging list1 with list2, then merge the result with list3, and so on.",
+      "Use a min-heap (priority queue) to efficiently get the smallest node among all k lists.",
+      "Divide and conquer: Pair up k lists and merge each pair in parallel, then repeat until one list remains.",
+    ],
+    timeComplexity:
+      "O(N log k) where N is total number of nodes and k is number of lists (using heap)",
+    spaceComplexity:
+      "O(k) for the heap, or O(1) if using divide and conquer with constant space merging",
   },
 };
 
-export const LANGUAGE_CONFIG = {
+export const LANGUAGE_CONFIGS = {
   javascript: {
     name: "JavaScript",
-    icon: "/javascript.png",
+    imgSrc: "/images/javascript.png",
     monacoLang: "javascript",
   },
   python: {
     name: "Python",
-    icon: "/python.png",
+    imgSrc: "/images/python.png",
     monacoLang: "python",
   },
   java: {
     name: "Java",
-    icon: "/java.png",
+    imgSrc: "/images/java.png",
     monacoLang: "java",
   },
 };
