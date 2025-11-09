@@ -106,7 +106,7 @@ const ActiveSessions = ({ isLoading, sessions, userInSession }) => (
                       </span>
                     </div>
 
-                    {/* Metadata */}
+                    {/* Metadata section */}
                     <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm opacity-80">
                       <div className="max-sm:hidden flex items-center gap-1.5">
                         <Crown
@@ -139,7 +139,7 @@ const ActiveSessions = ({ isLoading, sessions, userInSession }) => (
                       </div>
 
                       {/* Status badges */}
-                      {session.participant && !userInSession(session) ? (
+                      {session.participantId && !userInSession(session) ? (
                         <span
                           className="badge badge-ghost badge-xs sm:badge-sm text-error font-semibold"
                           role="status"
@@ -162,7 +162,7 @@ const ActiveSessions = ({ isLoading, sessions, userInSession }) => (
 
                 {/* Right side */}
                 <div className="flex sm:block justify-end sm:justify-start">
-                  {session.participant && !userInSession(session) ? (
+                  {session.participantId && !userInSession(session) ? (
                     <button
                       type="button"
                       disabled
@@ -176,8 +176,8 @@ const ActiveSessions = ({ isLoading, sessions, userInSession }) => (
                       to={`/sessions/${session._id}`}
                       aria-label={
                         userInSession(session)
-                          ? `Rejoin session: ${session.problem}`
-                          : `Join session: ${session.problem}`
+                          ? `Rejoin session: ${session.problemTitle}`
+                          : `Join session: ${session.problemTitle}`
                       }
                       className="btn btn-primary btn-xs sm:btn-sm gap-1.5 sm:gap-2 w-24 sm:w-auto transition-transform duration-200 hover:scale-105 focus-visible:scale-105"
                     >

@@ -8,47 +8,45 @@ import {
 } from "./pages";
 import { Toaster } from "react-hot-toast";
 
-function App() {
-  return (
-    <>
-      <Routes>
-        <Route
-          index
-          element={
-            <PublicRoute>
-              <HomePage />
-            </PublicRoute>
-          }
-        />
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <DashboardPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/problems"
-          element={
-            <ProtectedRoute>
-              <ProblemsPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/problems/:problemId"
-          element={
-            <ProtectedRoute>
-              <ProblemDetailsPage />
-            </ProtectedRoute>
-          }
-        />
-      </Routes>
+const App = () => (
+  <>
+    <Routes>
+      <Route
+        index
+        element={
+          <PublicRoute>
+            <HomePage />
+          </PublicRoute>
+        }
+      />
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute>
+            <DashboardPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/problems"
+        element={
+          <ProtectedRoute>
+            <ProblemsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/problems/:problemId"
+        element={
+          <ProtectedRoute>
+            <ProblemDetailsPage />
+          </ProtectedRoute>
+        }
+      />
+    </Routes>
 
-      <Toaster toastOptions={{ duration: 3000 }} />
-    </>
-  );
-}
+    <Toaster toastOptions={{ duration: 3000 }} />
+  </>
+);
 
 export default App;

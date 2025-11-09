@@ -83,7 +83,6 @@ export async function executeUserCode(language, userCode, options = {}) {
       body: JSON.stringify(body),
       signal: controller.signal,
     });
-
     clearTimeout(timer);
 
     if (!response.ok) {
@@ -121,20 +120,24 @@ export async function executeUserCode(language, userCode, options = {}) {
     const timedOut = !!run.signal || !!run.killed;
 
     // Success if: exit code is 0 AND no stderr (or stderr is just warnings)
-    const hasError = stderr.trim().length > 0;
     const hasNonZeroExit = code !== null && code !== 0;
+    const hasRunFailureStatus =
+      typeof run.status === "string" && run.status.trim().length > 0;
+    const hasStderr = stderr.trim().length > 0;
 
-    if (timedOut || hasNonZeroExit || hasError) {
+    if (timedOut || hasNonZeroExit || hasRunFailureStatus) {
       return {
         success: false,
         stdout,
         stderr,
         output: output || stdout,
         error:
-          stderr ||
           (timedOut ? "Execution timed out" : "") ||
+          (hasRunFailureStatus ? run.message || "Execution failed" : "") ||
           (code !== null
             ? `Process exited with code ${code}`
+            : hasStderr
+            ? stderr.trim()
             : "Execution failed"),
         code,
         timedOut,

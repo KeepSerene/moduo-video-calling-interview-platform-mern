@@ -41,6 +41,11 @@ function DashboardPage() {
       },
       {
         onSuccess(data) {
+          if (!data?.session?._id) {
+            toast.error("Invalid response from server!");
+            return;
+          }
+
           // A session is successfully created, so close the create session modal
           setOpenCreateSessionModal(false);
           // data.session is what the handleCreateSession controller sends on success from the backend
@@ -57,8 +62,8 @@ function DashboardPage() {
     if (!user || !session) return false;
 
     return (
-      user.id === session.hostId.clerkId ||
-      user.id === session.participantId.clerkId
+      user.id === session.hostId?.clerkId ||
+      user.id === session.participantId?.clerkId
     );
   };
 
