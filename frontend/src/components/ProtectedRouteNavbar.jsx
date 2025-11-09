@@ -44,6 +44,7 @@ const ProtectedRouteNavbar = () => (
             <NavLink
               key={label}
               to={url}
+              end
               aria-label={`Click to visit ${label} page`}
               className={({ isActive }) =>
                 `btn ${

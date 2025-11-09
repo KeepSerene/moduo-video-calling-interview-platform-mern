@@ -17,12 +17,26 @@ function ProblemDetailsPage() {
   const { problemId } = useParams();
   const navigate = useNavigate();
 
+  // State to track window size for responsive layout
+  const [isOnSmScreen, setIsOnSmScreen] = useState(window.innerWidth < 992);
+
   // Early redirect if invalid problem ID
   useEffect(() => {
     if (!PROBLEMS[problemId]) {
       navigate("/problems/two-sum");
     }
   }, [problemId, navigate]);
+
+  // Listen for window resize to update layout
+  useEffect(() => {
+    const handleResize = () => {
+      setIsOnSmScreen(window.innerWidth < 992);
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const [currentProblemId, setCurrentProblemId] = useState(problemId);
   const [selectedLanguage, setSelectedLanguage] = useState("javascript");
@@ -70,10 +84,15 @@ function ProblemDetailsPage() {
           toast.error("One or more tests failed! Check your output.");
         }
       } else {
-        toast.error("Code execution failed!");
+        if (result.timedOut) {
+          toast.error("Code execution timed out!");
+        } else {
+          toast.error("Code execution failed!");
+        }
       }
     } catch (error) {
       console.error("Error running user's code:", error);
+      toast.error("An unexpected error occurred! Please try again.");
     } finally {
       setIsRunning(false);
     }
@@ -101,9 +120,14 @@ function ProblemDetailsPage() {
       <ProtectedRouteNavbar />
 
       <div className="flex-1 overflow-hidden">
-        <PanelGroup direction="horizontal">
-          {/* Left panel - problem info */}
-          <Panel defaultSize={40} minSize={30} maxSize={70}>
+        {/* Layout: vertical on small screens, horizontal on desktop */}
+        <PanelGroup direction={isOnSmScreen ? "vertical" : "horizontal"}>
+          {/* Problem info panel */}
+          <Panel
+            defaultSize={isOnSmScreen ? 50 : 40}
+            minSize={isOnSmScreen ? 20 : 30}
+            maxSize={isOnSmScreen ? 80 : 70}
+          >
             <ProblemInfo
               problemId={currentProblemId}
               problem={currentProblem}
@@ -112,12 +136,21 @@ function ProblemDetailsPage() {
             />
           </Panel>
 
-          <PanelResizeHandle className="w-2 bg-base-300 cursor-col-resize transition-colors hover:bg-primary focus-within:bg-primary" />
+          {/* Responsive resize handle */}
+          <PanelResizeHandle
+            className={`${
+              isOnSmScreen ? "h-2 cursor-row-resize" : "w-2 cursor-col-resize"
+            } bg-base-300 transition-colors hover:bg-primary focus-within:bg-primary`}
+          />
 
-          {/* Right panel - code editor & output panel */}
-          <Panel defaultSize={60} minSize={30} maxSize={70}>
+          {/* Code editor & output panel */}
+          <Panel
+            defaultSize={isOnSmScreen ? 50 : 60}
+            minSize={isOnSmScreen ? 20 : 30}
+            maxSize={isOnSmScreen ? 80 : 70}
+          >
             <PanelGroup direction="vertical">
-              {/* Top panel - code editor */}
+              {/* Code editor */}
               <Panel defaultSize={70} minSize={30} maxSize={90}>
                 <CodeEditor
                   selectedLanguage={selectedLanguage}
@@ -131,7 +164,7 @@ function ProblemDetailsPage() {
 
               <PanelResizeHandle className="h-2 bg-base-300 cursor-row-resize transition-colors hover:bg-primary focus-within:bg-primary" />
 
-              {/* Bottom panel - output panel */}
+              {/* Output panel */}
               <Panel defaultSize={30} minSize={10} maxSize={70}>
                 <OutputPanel output={codeRunResult} />
               </Panel>

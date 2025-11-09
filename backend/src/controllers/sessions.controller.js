@@ -20,7 +20,7 @@ export async function handleCreateSession(req, res) {
     // Create a session document in MongoDB
     const session = await Session.create({
       problemTitle,
-      difficulty,
+      difficulty: difficulty.toLowerCase(),
       hostId: dbUserId,
       callId,
     });
@@ -42,7 +42,7 @@ export async function handleCreateSession(req, res) {
 
     await channel.create();
 
-    return res.status(201).json(session);
+    return res.status(201).json({ session });
   } catch (error) {
     console.error("Create session handler error:", error.message);
 
@@ -54,10 +54,11 @@ export async function handleActiveSessions(_, res) {
   try {
     const activeSessions = await Session.find({ status: "active" })
       .populate("hostId", "clerkId name email profileImageUrl")
+      .populate("participantId", "clerkId name email profileImageUrl")
       .sort({ createdAt: -1 })
       .limit(20);
 
-    return res.status(200).json(activeSessions);
+    return res.status(200).json({ sessions: activeSessions });
   } catch (error) {
     console.error("Active sessions handler error:", error.message);
 
@@ -77,7 +78,7 @@ export async function handlePastSessions(req, res) {
       .sort({ createdAt: -1 })
       .limit(20);
 
-    return res.status(200).json(pastSessions);
+    return res.status(200).json({ sessions: pastSessions });
   } catch (error) {
     console.error("Past sessions handler error:", error.message);
 
@@ -96,7 +97,7 @@ export async function handleGetSession(req, res) {
       return res.status(404).json({ message: "Session Not Found!" });
     }
 
-    return res.status(200).json(session);
+    return res.status(200).json({ session });
   } catch (error) {
     console.error("Get session handler error:", error.message);
 
@@ -140,7 +141,7 @@ export async function handleJoinSession(req, res) {
     const channel = chatClient.channel("messaging", session.callId);
     await channel.addMembers([clerkUserId]);
 
-    return res.status(200).json(session);
+    return res.status(200).json({ session });
   } catch (error) {
     console.error("Join session handler error:", error.message);
 
@@ -156,15 +157,21 @@ export async function handleEndSession(req, res) {
     const session = await Session.findById(sessionId);
 
     if (!session) {
-      return res.status(404).json({ message: "Session Not Found!" });
+      return res
+        .status(404)
+        .json({ session: null, message: "Session Not Found!" });
     }
 
     if (session.hostId.toString() !== dbUserId.toString()) {
-      return res.status(403).json({ message: "Only hosts can end sessions!" });
+      return res
+        .status(403)
+        .json({ session: null, message: "Only hosts can end sessions!" });
     }
 
     if (session.status === "completed") {
-      return res.status(400).json({ message: "Session is already completed!" });
+      return res
+        .status(400)
+        .json({ session: null, message: "Session is already completed!" });
     }
 
     // Delete the session video call and the chat channel
