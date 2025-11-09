@@ -1,6 +1,6 @@
 import { getFileExtension } from "./utils";
 
-const PISTON_BASE_API_URL = "https://emkc.org/api/v2/piston";
+const PISTON_API_BASE_URL = "https://emkc.org/api/v2/piston";
 
 const LANGUAGES = {
   javascript: { language: "javascript", version: "18.15.0" },
@@ -72,25 +72,44 @@ export async function executeUserCode(language, userCode, options = {}) {
       ],
       stdin,
       args,
+      // compile timeout to prevent hanging on compilation errors
+      compile_timeout: 10000,
+      run_timeout: 3000,
     };
 
-    const response = await fetch(`${PISTON_BASE_API_URL}/execute`, {
+    const response = await fetch(`${PISTON_API_BASE_URL}/execute`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
       signal: controller.signal,
     });
-
     clearTimeout(timer);
 
     if (!response.ok) {
+      const errorText = await response.text().catch(() => "Unknown error");
+
       return {
         success: false,
-        error: `HTTP error while executing code: ${response.status} ${response.statusText}`,
+        error: `HTTP ${response.status}: ${response.statusText}${
+          errorText ? ` - ${errorText}` : ""
+        }`,
       };
     }
 
     const data = await response.json();
+
+    // Handle compilation errors
+    const compile = data.compile || {};
+
+    if (compile.code !== undefined && compile.code !== 0) {
+      return {
+        success: false,
+        error: compile.stderr || compile.output || "Compilation failed",
+        output: compile.stdout || "",
+        stderr: compile.stderr || "",
+        code: compile.code,
+      };
+    }
 
     const run = data.run || {};
     // Piston responses can include output (combined) or separate stdout/stderr fields
@@ -98,19 +117,27 @@ export async function executeUserCode(language, userCode, options = {}) {
     const stderr = run.stderr ?? "";
     const output = run.output ?? stdout;
     const code = typeof run.code === "number" ? run.code : null;
-    const timedOut = !!run.timedOut || !!run.killed;
+    const timedOut = !!run.signal || !!run.killed;
 
-    // If there was runtime stderr, non-zero exit code, or timed out — indicate failure but return details
-    if (timedOut || (code !== null && code !== 0) || stderr) {
+    // Success if: exit code is 0 AND no stderr (or stderr is just warnings)
+    const hasNonZeroExit = code !== null && code !== 0;
+    const hasRunFailureStatus =
+      typeof run.status === "string" && run.status.trim().length > 0;
+    const hasStderr = stderr.trim().length > 0;
+
+    if (timedOut || hasNonZeroExit || hasRunFailureStatus) {
       return {
         success: false,
         stdout,
         stderr,
-        output,
+        output: output || stdout,
         error:
-          stderr ||
+          (timedOut ? "Execution timed out" : "") ||
+          (hasRunFailureStatus ? run.message || "Execution failed" : "") ||
           (code !== null
             ? `Process exited with code ${code}`
+            : hasStderr
+            ? stderr.trim()
             : "Execution failed"),
         code,
         timedOut,
@@ -120,7 +147,8 @@ export async function executeUserCode(language, userCode, options = {}) {
     return {
       success: true,
       stdout,
-      output: output || "No output",
+      output: output || stdout || "No output",
+      stderr: "",
       code,
     };
   } catch (err) {
@@ -130,6 +158,14 @@ export async function executeUserCode(language, userCode, options = {}) {
         success: false,
         error: `Execution timed out after ${Math.ceil(timeout / 1000)}s`,
         timedOut: true,
+      };
+    }
+
+    if (err.name === "TypeError" && err.message.includes("fetch")) {
+      return {
+        success: false,
+        error:
+          "Network error: Unable to reach code execution service. Please check your connection.",
       };
     }
 

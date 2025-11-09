@@ -23,10 +23,9 @@ app.use(cors({ origin: ENV.CLIENT_URL, credentials: true }));
 app.use("/api/inngest", serve({ client: inngest, functions }));
 app.use(clerkMiddleware()); // makes `req.auth()` accessible
 
+// API routes should come BEFORE static file serving
 app.use("/api/chats", chatsRouter);
 app.use("/api/sessions", sessionsRouter);
-
-// API routes should come BEFORE static file serving
 app.get("/api/test", (_, res) => {
   res.status(200).json({ msg: "Hello from the test server!" });
 });
