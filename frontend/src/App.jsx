@@ -5,6 +5,7 @@ import {
   HomePage,
   ProblemDetailsPage,
   ProblemsPage,
+  SessionPage,
 } from "./pages";
 import { Toaster } from "react-hot-toast";
 
@@ -40,6 +41,14 @@ const App = () => (
         element={
           <ProtectedRoute>
             <ProblemDetailsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/sessions/:sessionId"
+        element={
+          <ProtectedRoute>
+            <SessionPage />
           </ProtectedRoute>
         }
       />
