@@ -81,18 +81,22 @@ function ProblemDetailsPage() {
           toast.success("All tests passed. Yay!");
           triggerConfetti();
         } else {
-          toast.error("One or more tests failed! Check your output.");
+          toast.error("One or more tests failed! Check your output.", {
+            duration: 4000,
+          });
         }
       } else {
         if (result.timedOut) {
-          toast.error("Code execution timed out!");
+          toast.error("Code execution timed out!", { duration: 4000 });
         } else {
-          toast.error("Code execution failed!");
+          toast.error("Code execution failed!", { duration: 4000 });
         }
       }
     } catch (error) {
       console.error("Error running user's code:", error);
-      toast.error("An unexpected error occurred! Please try again.");
+      toast.error("An unexpected error occurred! Please try again.", {
+        duration: 4000,
+      });
     } finally {
       setIsRunning(false);
     }

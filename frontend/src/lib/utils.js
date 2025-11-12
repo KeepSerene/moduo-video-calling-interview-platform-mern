@@ -1,5 +1,5 @@
 export function getDifficultyBadgeClassName(difficulty) {
-  switch (difficulty.toLowerCase()) {
+  switch (difficulty?.toLowerCase() || "easy") {
     case "easy":
       return "badge-success";
     case "medium":

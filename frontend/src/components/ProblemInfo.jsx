@@ -115,7 +115,7 @@ function ProblemInfo({ problemId, problem, onProblemChange, allProblems }) {
         </section>
 
         {/* Constraints */}
-        <section className="bg-base-100 border border-base-300 rounded-xl shadow-sm p-4 sm:p-5">
+        <section className="bg-base-100 border border-base-300 rounded-xl p-4 sm:p-5 shadow-sm">
           <h2 className="text-base-content text-lg sm:text-xl font-bold mb-4">
             Constraints
           </h2>
@@ -134,7 +134,7 @@ function ProblemInfo({ problemId, problem, onProblemChange, allProblems }) {
 
         {/* Hints */}
         {hints && hints.length > 0 && (
-          <section className="bg-base-100 border border-base-300 rounded-xl shadow-sm p-4 sm:p-5">
+          <section className="bg-base-100 border border-base-300 rounded-xl p-4 sm:p-5 shadow-sm">
             <div className="flex items-center gap-2 mb-4">
               <Lightbulb className="size-5 text-warning" />
 
@@ -166,7 +166,7 @@ function ProblemInfo({ problemId, problem, onProblemChange, allProblems }) {
 
         {/* Complexity analysis */}
         {(timeComplexity || spaceComplexity) && (
-          <section className="bg-base-100 border border-base-300 rounded-xl shadow-sm p-4 sm:p-5">
+          <section className="bg-base-100 border border-base-300 rounded-xl p-4 sm:p-5 shadow-sm">
             <h2 className="text-base-content text-lg sm:text-xl font-bold mb-4">
               Complexity Analysis
             </h2>

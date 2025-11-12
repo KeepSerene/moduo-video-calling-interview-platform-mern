@@ -10,33 +10,45 @@
   --font-mono: "IBM Plex Mono", monospace;
 }
 
-html {
-  color-scheme: dark;
-}
+@layer base {
+  html {
+    color-scheme: dark;
+  }
 
-body {
-  @apply bg-base-100 font-sans text-base-content text-base;
-  @apply selection:bg-primary/20;
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    @apply cursor-pointer;
+  }
 
-  scrollbar-width: thin;
-}
+  button:disabled,
+  [role="button"]:disabled {
+    @apply cursor-not-allowed;
+  }
 
-::-webkit-scrollbar {
-  width: 8px;
-}
+  body {
+    @apply bg-base-100 font-sans text-base-content text-base;
+    @apply selection:bg-primary/20;
 
-::-webkit-scrollbar-track {
-  background-color: oklch(20.84% 0.008 17.911);
-}
+    scrollbar-width: thin;
+  }
 
-::-webkit-scrollbar-thumb {
-  background-color: oklch(83.768% 0.001 17.911);
-  @apply rounded;
-}
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
 
-code,
-pre {
-  @apply font-mono;
+  ::-webkit-scrollbar-track {
+    background-color: oklch(20.84% 0.008 17.911);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: oklch(83.768% 0.001 17.911);
+    @apply rounded;
+  }
+
+  code,
+  pre {
+    @apply font-mono;
+  }
 }
 
 @utility text-gradient {
