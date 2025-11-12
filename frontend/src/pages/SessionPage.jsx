@@ -11,6 +11,7 @@ import { executeUserCode } from "../lib/piston";
 import {
   CallAndChatUI,
   CodeEditor,
+  ConfirmationModal,
   OutputPanel,
   ProtectedRouteNavbar,
 } from "../components";
@@ -24,6 +25,8 @@ import {
   AlertCircle,
   CameraOff,
   X,
+  Copy,
+  Monitor,
 } from "lucide-react";
 import useStream from "../hooks/useStream";
 import toast from "react-hot-toast";
@@ -33,7 +36,10 @@ function SessionPage() {
   const { sessionId } = useParams();
   const navigate = useNavigate();
   const { user } = useUser();
-  const hasJoined = useRef(false); // prevent duplicate call joins
+
+  // Refs to prevent duplicate join attempts - using sessionId as key
+  const hasJoinedRef = useRef(false);
+  const previousSessionIdRef = useRef(null);
 
   const {
     data: sessionData,
@@ -60,6 +66,8 @@ function SessionPage() {
   );
   const [output, setOutput] = useState(null);
   const [isRunning, setIsRunning] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+  const [isEndSessionModalOpen, setIsEndSessionModalOpen] = useState(false);
 
   const {
     streamVideoClient,
@@ -71,24 +79,63 @@ function SessionPage() {
     hasMediaPermissions,
   } = useStream(sessionDataLoading, session, isHost, isParticipant);
 
-  // Auto-join session (with duplicate prevention)
+  // Handle window resize to detect mobile
   useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 1024);
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // Reset join ref when session changes
+  useEffect(() => {
+    if (sessionId !== previousSessionIdRef.current) {
+      hasJoinedRef.current = false;
+      previousSessionIdRef.current = sessionId;
+    }
+  }, [sessionId]);
+
+  // Auto-join session with improved duplicate prevention
+  useEffect(() => {
+    // Don't proceed if:
+    // - No user
+    // - Session data is loading
+    // - No session
+    // - User is already host or participant
+    // - Already attempted to join this session
     if (
       !user ||
       sessionDataLoading ||
       !session ||
+      !session._id ||
       isHost ||
       isParticipant ||
-      hasJoined.current
+      hasJoinedRef.current ||
+      joinSessionMutation.isPending
     ) {
       return;
     }
 
-    hasJoined.current = true;
+    // mark as joined before making the request to prevent race conditions
+    hasJoinedRef.current = true;
+
     joinSessionMutation.mutate(sessionId, {
-      onSuccess: refetchSessionData,
-      onError: () => {
-        hasJoined.current = false; // reset on error to allow retry
+      onSuccess: () => {
+        refetchSessionData();
+      },
+      onError: (error) => {
+        console.error("Join session error:", error);
+        // only reset if it's not a "session full" or "already joined" error
+        const errorMessage = error?.response?.data?.message || "";
+        if (
+          !errorMessage.includes("full") &&
+          !errorMessage.includes("participant")
+        ) {
+          hasJoinedRef.current = false;
+        }
       },
     });
   }, [user, sessionDataLoading, session, isHost, isParticipant, sessionId]);
@@ -132,15 +179,73 @@ function SessionPage() {
     }
   };
 
-  const handleEndSession = () => {
-    if (!confirm("End this session? The participant will also be notified.")) {
-      return;
-    }
+  const confirmEndSession = () => {
+    if (!isHost) return;
 
     endSessionMutation.mutate(sessionId, {
-      onSuccess: () => navigate("/dashboard"),
+      onSuccess: () => {
+        navigate("/dashboard");
+      },
+      onError: (error) => {
+        console.error("Error ending session:", error);
+      },
     });
   };
+
+  const handleEndSession = () => {
+    if (!isHost) return;
+
+    setIsEndSessionModalOpen(true);
+  };
+
+  const handleCopyUrl = () => {
+    navigator.clipboard.writeText(window.location.href);
+    toast.success("Session URL copied to clipboard!");
+  };
+
+  // If mobile, show desktop-only message
+  if (isMobile) {
+    return (
+      <main className="h-screen bg-base-100 flex flex-col">
+        <ProtectedRouteNavbar />
+
+        <div className="flex-1 flex items-center justify-center p-6">
+          <div className="max-w-md w-full">
+            <div className="bg-info/10 border border-info/20 rounded-xl p-6 text-center space-y-4">
+              <Monitor className="size-16 text-info mx-auto" />
+
+              <h2 className="text-2xl font-bold text-base-content">
+                Desktop Required
+              </h2>
+
+              <p className="text-base-content/70 text-sm">
+                Interview sessions require a desktop or laptop computer for the
+                best experience. Please open this URL on a larger screen to
+                participate.
+              </p>
+
+              <button
+                type="button"
+                onClick={handleCopyUrl}
+                className="btn btn-info btn-block gap-2"
+              >
+                <Copy className="size-4" />
+                Copy Session URL
+              </button>
+
+              <button
+                type="button"
+                onClick={() => navigate("/dashboard")}
+                className="btn btn-ghost btn-block"
+              >
+                Back to Dashboard
+              </button>
+            </div>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="h-screen bg-base-100 flex flex-col">
@@ -172,7 +277,7 @@ function SessionPage() {
         </div>
       )}
 
-      <div className="flex-1">
+      <div className="flex-1 overflow-hidden">
         <PanelGroup direction="horizontal">
           {/* Left panel - problem details and code editor */}
           <Panel defaultSize={50} minSize={30} maxSize={70}>
@@ -181,20 +286,20 @@ function SessionPage() {
               <Panel defaultSize={50} minSize={10} maxSize={90}>
                 <article className="h-full bg-base-200 overflow-y-auto">
                   {/* Header */}
-                  <header className="bg-base-100 border-b border-base-300 p-6">
-                    <div className="mb-3 flex flex-wrap justify-between items-start gap-4">
-                      <div>
-                        <h1 className="text-base-content text-3xl font-bold">
+                  <header className="bg-base-100 border-b border-base-300 p-4 lg:p-6">
+                    <div className="space-y-3 lg:space-y-0 flex flex-wrap justify-between items-start gap-4">
+                      <div className="min-w-0 flex-1">
+                        <h1 className="text-base-content text-xl sm:text-2xl lg:text-3xl font-bold wrap-break-word">
                           {session?.problemTitle || "Problem"}
                         </h1>
 
                         {problem?.category && (
-                          <p className="text-base-content/60 mt-1">
+                          <p className="text-base-content/60 mt-1 text-sm sm:text-base">
                             {problem.category}
                           </p>
                         )}
 
-                        <p className="text-base-content/60 mt-2">
+                        <p className="text-base-content/60 mt-2 text-xs sm:text-sm lg:text-base">
                           Host: {session?.hostId?.name || "User"} &bull;{" "}
                           {session?.participantId
                             ? "2/2 participants"
@@ -202,9 +307,9 @@ function SessionPage() {
                         </p>
                       </div>
 
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
                         <span
-                          className={`badge badge-lg capitalize ${getDifficultyBadgeClassName(
+                          className={`badge badge-md sm:badge-lg capitalize ${getDifficultyBadgeClassName(
                             session?.difficulty
                           )}`}
                         >
@@ -215,20 +320,25 @@ function SessionPage() {
                           <button
                             type="button"
                             onClick={handleEndSession}
+                            className="btn btn-error btn-sm"
                             disabled={endSessionMutation.isPending}
-                            className="btn btn-error btn-sm gap-0.5"
                           >
                             {endSessionMutation.isPending ? (
-                              <Loader2 className="size-4 animate-spin" />
+                              <>
+                                <Loader2 className="size-4 animate-spin" />
+                                Ending...
+                              </>
                             ) : (
-                              <X className="size-4" />
+                              <>
+                                <X className="size-4" />
+                                End Session
+                              </>
                             )}
-                            End Session
                           </button>
                         )}
 
                         {session?.status === "completed" && (
-                          <span className="badge badge-ghost badge-lg">
+                          <span className="badge badge-ghost badge-md sm:badge-lg">
                             Completed
                           </span>
                         )}
@@ -469,7 +579,6 @@ function SessionPage() {
                   </button>
                 </div>
               ) : !streamVideoClient || !call ? (
-                // Needed because on the initial render, both the objects are null
                 <div className="h-full text-center flex flex-col justify-center items-center">
                   <Loader2 className="size-8 text-primary mx-auto mb-2 animate-spin" />
                   <p className="text-base-content/70">Preparing call...</p>
@@ -490,6 +599,16 @@ function SessionPage() {
           </Panel>
         </PanelGroup>
       </div>
+
+      <ConfirmationModal
+        isOpen={isEndSessionModalOpen}
+        onClose={() => setIsEndSessionModalOpen(false)}
+        onConfirm={confirmEndSession}
+        title="End Session"
+        message="Are you sure you want to end this interview session for all participants?"
+        confirmButtonText="Confirm"
+        confirmButtonClassName="btn-error"
+      />
     </main>
   );
 }

@@ -14,6 +14,7 @@ import {
   useCreateSession,
   useRecentSessions,
 } from "../hooks/useSessions";
+import toast from "react-hot-toast";
 
 function DashboardPage() {
   const navigate = useNavigate();
@@ -34,6 +35,9 @@ function DashboardPage() {
   const handleCreateSession = () => {
     if (!sessionConfig.problemTitle || !sessionConfig.difficulty) return;
 
+    // prevent double submission
+    if (createSessionMutation.isPending) return;
+
     createSessionMutation.mutate(
       {
         problemTitle: sessionConfig.problemTitle,
@@ -46,9 +50,10 @@ function DashboardPage() {
             return;
           }
 
-          // A session is successfully created, so close the create session modal
+          // Close modal and reset config BEFORE navigation
           setOpenCreateSessionModal(false);
-          // data.session is what the handleCreateSession controller sends on success from the backend
+          setSessionConfig({ problemTitle: "", difficulty: "" });
+
           navigate(`/sessions/${data.session._id}`);
         },
       }

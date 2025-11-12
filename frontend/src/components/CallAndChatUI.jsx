@@ -10,7 +10,7 @@ import {
   useCallStateHooks,
 } from "@stream-io/video-react-sdk";
 import { Loader2, MessageSquareCode, Users2, X } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import {
   Channel,
@@ -30,30 +30,58 @@ function CallAndChatUI({ chatClient, chatChannel }) {
 
   const [isChatOpen, setIsChatOpen] = useState(false);
 
+  // State to track if screen is large enough for side-by-side layout
+  const [isLargeScreen, setIsLargeScreen] = useState(window.innerWidth >= 992);
+
+  // Handle window resize to adjust layout
+  useEffect(() => {
+    const handleResize = () => {
+      const newIsLargeScreen = window.innerWidth >= 992;
+      setIsLargeScreen(newIsLargeScreen);
+
+      // Close chat if screen becomes too small
+      if (!newIsLargeScreen && isChatOpen) {
+        setIsChatOpen(false);
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    return () => window.removeEventListener("resize", handleResize);
+  }, [isChatOpen]);
+
   if (callingState === CallingState.JOINING) {
     return (
       <div className="h-full text-center flex items-center justify-center">
-        <Loader2 className="size-12 text-primary mx-auto mb-4 animate-spin" />
-        <p className="text-lg">Joining call...</p>
+        <div>
+          <Loader2 className="size-12 text-primary mx-auto mb-4 animate-spin" />
+          <p className="text-lg">Joining call...</p>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="str-video h-full flex gap-3 relative">
-      <div className="flex-1 flex flex-col gap-3">
+      {/* Main call section */}
+      <div
+        className={`flex-1 flex flex-col gap-3 min-w-0 ${
+          isChatOpen && isLargeScreen ? "lg:flex-[1.5]" : "flex-1"
+        }`}
+      >
         {/* Participant count badge and chat toggler */}
-        <div className="bg-base-100 rounded-lg p-3 shadow flex justify-between items-center gap-2">
+        <div className="bg-base-100 rounded-lg p-2.5 sm:p-3 shadow flex justify-between items-center gap-2">
           <div className="flex items-center gap-2">
-            <Users2 className="size-5 text-primary" />
+            <Users2 className="size-4 sm:size-5 text-primary shrink-0" />
 
-            <span className="font-semibold">
+            <span className="font-semibold text-sm sm:text-base">
               {participantCount}{" "}
               {participantCount === 1 ? "participant" : "participants"}
             </span>
           </div>
 
-          {chatClient && chatChannel && (
+          {/* Only show chat toggle button if chat is available and screen is large enough */}
+          {chatClient && chatChannel && isLargeScreen && (
             <button
               type="button"
               onClick={() => setIsChatOpen(!isChatOpen)}
@@ -61,35 +89,39 @@ function CallAndChatUI({ chatClient, chatChannel }) {
               title={isChatOpen ? "Hide chat" : "Open chat"}
               className={`btn ${
                 isChatOpen ? "btn-primary" : "btn-ghost"
-              } btn-sm`}
+              } btn-xs sm:btn-sm`}
             >
-              <MessageSquareCode className="size-4" />
-              Chat
+              <MessageSquareCode className="size-3.5 sm:size-4" />
+              <span className="hidden sm:inline">Chat</span>
             </button>
           )}
         </div>
 
         {/* Video call UI */}
-        <div className="flex-1 bg-base-300 rounded-lg overflow-hidden relative">
+        <div className="flex-1 bg-base-300 rounded-lg overflow-hidden relative min-h-0">
           <SpeakerLayout />
         </div>
 
-        <div className="bg-base-100 rounded-lg p-3 shadow flex justify-center items-center">
+        {/* Call controls */}
+        <div className="bg-base-100 rounded-lg p-2.5 sm:p-3 shadow flex justify-center items-center">
           <CallControls onLeave={() => navigate("/dashboard")} />
         </div>
       </div>
 
-      {/* Chat UI */}
-      {chatClient && chatChannel && (
+      {/* Chat UI - only render if screen is large enough */}
+      {chatClient && chatChannel && isLargeScreen && (
         <div
           className={`${
-            isChatOpen ? "w-80 opacity-100" : "w-0 opacity-0"
-          } bg-[#272a30] rounded-lg shadow overflow-hidden  flex flex-col transition-all duration-300 ease-in-out`}
+            isChatOpen ? "w-64 sm:w-72 lg:w-80 opacity-100" : "w-0 opacity-0"
+          } bg-[#272a30] rounded-lg shadow overflow-hidden flex flex-col transition-all duration-300 ease-in-out shrink-0`}
         >
           {isChatOpen && (
             <>
-              <section className="bg-[#1c1e22] border-b border-[#3a3d44] p-3 flex justify-between items-center">
-                <h3 className="text-white font-semibold">Session Chat</h3>
+              {/* Chat header */}
+              <section className="bg-[#1c1e22] border-b border-[#3a3d44] p-2.5 sm:p-3 flex justify-between items-center shrink-0">
+                <h3 className="text-white font-semibold text-sm sm:text-base">
+                  Session Chat
+                </h3>
 
                 <button
                   type="button"
@@ -98,11 +130,12 @@ function CallAndChatUI({ chatClient, chatChannel }) {
                   title="Close chat"
                   className="text-gray-400 transition-colors hover:text-white focus-visible:text-white"
                 >
-                  <X className="size-5" />
+                  <X className="size-4 sm:size-5" />
                 </button>
               </section>
 
-              <div className="flex-1 stream-chat-dark overflow-hidden">
+              {/* Chat messages area */}
+              <div className="flex-1 stream-chat-dark overflow-hidden min-h-0">
                 <Chat client={chatClient} theme="str-chat__theme-dark">
                   <Channel channel={chatChannel}>
                     <Window>
@@ -116,6 +149,16 @@ function CallAndChatUI({ chatClient, chatChannel }) {
               </div>
             </>
           )}
+        </div>
+      )}
+
+      {/* Info message for smaller screens */}
+      {!isLargeScreen && (
+        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-base-100/95 backdrop-blur-sm rounded-lg px-4 py-2 shadow-lg border border-base-300">
+          <p className="text-xs text-base-content/70 text-center">
+            <MessageSquareCode className="size-3 inline mr-1" />
+            Chat available on larger screens
+          </p>
         </div>
       )}
     </div>

@@ -8,7 +8,8 @@ function SessionStatsCards({ activeSessionsCount, recentSessionsCount }) {
       iconColor: "text-primary",
       label: "Active sessions",
       borderColor: "border-primary/20",
-      hoverAndFocusClass: "border-primary/40",
+      hoverAndFocusClassNames:
+        "hover:border-primary/40 focus-within:border-primary/40",
       count: activeSessionsCount,
       ariaLabel: `${activeSessionsCount} active ${
         activeSessionsCount === 1 ? "session" : "sessions"
@@ -20,7 +21,8 @@ function SessionStatsCards({ activeSessionsCount, recentSessionsCount }) {
       iconColor: "text-secondary",
       label: "Total sessions",
       borderColor: "border-secondary/20",
-      hoverAndFocusClass: "border-secondary/40",
+      hoverAndFocusClassNames:
+        "hover:border-secondary/40 focus-within:border-secondary/40",
       count: recentSessionsCount,
       ariaLabel: `${recentSessionsCount} total ${
         recentSessionsCount === 1 ? "session" : "sessions"
@@ -37,13 +39,13 @@ function SessionStatsCards({ activeSessionsCount, recentSessionsCount }) {
           iconColor,
           label,
           borderColor,
-          hoverAndFocusClass,
+          hoverAndFocusClassNames,
           count,
           ariaLabel,
         }) => (
           <li
             key={label}
-            className={`card bg-base-100 border-2 ${borderColor} hover:${hoverAndFocusClass} focus-within:${hoverAndFocusClass} transition-colors duration-200`}
+            className={`card bg-base-100 border-2 ${borderColor} transition-colors duration-200 ${hoverAndFocusClassNames}`}
             aria-label={ariaLabel}
             role="article"
           >

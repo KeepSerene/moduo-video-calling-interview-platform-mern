@@ -1,10 +1,12 @@
 import { useNavigate } from "react-router";
-import { ProtectedRouteNavbar } from "../components";
+import { useState } from "react";
+import { ProtectedRouteNavbar, Pagination } from "../components";
 import { PROBLEMS } from "../data/problems";
 import { ChevronRight, Code2 } from "lucide-react";
 import { getDifficultyBadgeClassName } from "../lib/utils";
 
 const problems = Object.values(PROBLEMS);
+const ITEMS_PER_PAGE = 10;
 
 const stats = [
   {
@@ -37,6 +39,12 @@ const stats = [
 
 function ProblemsPage() {
   const navigate = useNavigate();
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // Calculate pagination
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = startIndex + ITEMS_PER_PAGE;
+  const paginatedProblems = problems.slice(startIndex, endIndex);
 
   return (
     <main className="min-h-screen bg-base-200">
@@ -55,8 +63,8 @@ function ProblemsPage() {
         </header>
 
         {/* Problems list */}
-        <ul className="space-y-4">
-          {problems.map(
+        <ul className="space-y-4 mb-6">
+          {paginatedProblems.map(
             ({ id, title, difficulty, category, description: { text } }) => (
               <li
                 key={id}
@@ -110,6 +118,15 @@ function ProblemsPage() {
             )
           )}
         </ul>
+
+        {/* Pagination */}
+        <Pagination
+          currentPage={currentPage}
+          totalItems={problems.length}
+          itemsPerPage={ITEMS_PER_PAGE}
+          onPageChange={setCurrentPage}
+          className="mb-8"
+        />
 
         {/* Stats */}
         <footer className="card bg-base-100 mt-12 shadow-lg">

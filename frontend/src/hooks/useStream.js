@@ -27,19 +27,29 @@ export default function useStream(
   const [streamError, setStreamError] = useState(null);
   const [hasMediaPermissions, setHasMediaPermissions] = useState(true);
 
-  // refs to track cleanup state
+  // refs to track cleanup state and prevent duplicate initializations
   const videoCallRef = useRef(null);
   const chatClientRef = useRef(null);
+  const isInitializingRef = useRef(false);
+  const hasInitializedRef = useRef(false);
 
   useEffect(() => {
     const initCall = async () => {
+      // prevent initialization if already in progress or completed
+      if (isInitializingRef.current || hasInitializedRef.current) {
+        return;
+      }
+
       if (
         !session?.callId ||
         session?.status === "completed" ||
         (!isHost && !isParticipant)
-      )
+      ) {
         return;
+      }
 
+      // mark as initializing
+      isInitializingRef.current = true;
       setIsInitializingCall(true);
       setStreamError(null);
 
@@ -73,6 +83,11 @@ export default function useStream(
         const { streamToken, userClerkId, username, userAvatarUrl } =
           await sessionsApi.getStreamToken();
 
+        // validate token data
+        if (!streamToken || !userClerkId) {
+          throw new Error("Invalid Stream token data received");
+        }
+
         // 3. Initialize video client
         const client = await initStreamVideoClient(
           { id: userClerkId, name: username, image: userAvatarUrl },
@@ -82,7 +97,19 @@ export default function useStream(
 
         // 4. Join video call
         const videoCall = client.call("default", session.callId);
-        await videoCall.join({ create: true });
+
+        // check if call is already joined before attempting to join
+        try {
+          await videoCall.join({ create: true });
+        } catch (joinError) {
+          // if already joined, get or create will handle it
+          if (joinError.message && joinError.message.includes("already")) {
+            console.log("Call already joined, continuing...");
+          } else {
+            throw joinError;
+          }
+        }
+
         setCall(videoCall);
         videoCallRef.current = videoCall;
 
@@ -100,13 +127,19 @@ export default function useStream(
         await channel.watch();
         setChatChannel(channel);
 
+        // mark initialization as complete
+        hasInitializedRef.current = true;
         toast.success("Connected to session!");
       } catch (error) {
         console.error("Stream initialization error:", error);
         setStreamError(error.message);
         toast.error("Failed to join the call. Please refresh and try again.");
+
+        // reset initialization flag on error to allow retry
+        hasInitializedRef.current = false;
       } finally {
         setIsInitializingCall(false);
+        isInitializingRef.current = false;
       }
     };
 
@@ -117,17 +150,48 @@ export default function useStream(
     return () => {
       const cleanup = async () => {
         try {
+          // leave video call only if it exists and hasn't been left already
           if (videoCallRef.current) {
-            await videoCallRef.current.leave();
+            try {
+              // check call state before attempting to leave
+              const callState = videoCallRef.current.state;
+
+              if (callState && callState.callingState !== "left") {
+                await videoCallRef.current.leave();
+              }
+            } catch (leaveError) {
+              // ignore "already left" errors
+              if (!leaveError.message?.includes("already been left")) {
+                console.error("Error leaving call:", leaveError);
+              }
+            }
             videoCallRef.current = null;
           }
 
+          // disconnect chat client
           if (chatClientRef.current) {
-            await chatClientRef.current.disconnectUser();
+            try {
+              await chatClientRef.current.disconnectUser();
+            } catch (disconnectError) {
+              console.error("Error disconnecting chat:", disconnectError);
+            }
             chatClientRef.current = null;
           }
 
-          await disconnectUserFromStreamVideoClient();
+          // disconnect video client
+          try {
+            await disconnectUserFromStreamVideoClient();
+          } catch (videoError) {
+            console.error("Error disconnecting video client:", videoError);
+          }
+
+          // reset all state
+          setStreamVideoClient(null);
+          setStreamChatClient(null);
+          setChatChannel(null);
+          setCall(null);
+          hasInitializedRef.current = false;
+          isInitializingRef.current = false;
         } catch (error) {
           console.error("Cleanup error:", error);
         }
