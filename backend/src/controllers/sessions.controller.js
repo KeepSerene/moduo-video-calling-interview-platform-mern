@@ -130,25 +130,34 @@ export async function handleJoinSession(req, res) {
       });
     }
 
-    if (session.participantId) {
-      return res.status(409).json({
-        message: "Session is full!",
-      });
-    }
-
     if (session.hostId.toString() === dbUserId.toString()) {
       return res.status(400).json({
         message: "You cannot join your own session as a participant!",
       });
     }
 
-    // Update session
-    session.participantId = dbUserId;
-    await session.save();
+    const participantAlreadyAssigned =
+      session.participantId &&
+      session.participantId.toString() === dbUserId.toString();
 
-    // Add to chat channel
-    const channel = chatClient.channel("messaging", session.callId);
-    await channel.addMembers([clerkUserId]);
+    if (
+      session.participantId &&
+      session.participantId.toString() !== dbUserId.toString()
+    ) {
+      return res.status(409).json({
+        message: "Session is full!",
+      });
+    }
+
+    if (!participantAlreadyAssigned) {
+      // Update session
+      session.participantId = dbUserId;
+      await session.save();
+
+      // Add to chat channel
+      const channel = chatClient.channel("messaging", session.callId);
+      await channel.addMembers([clerkUserId]);
+    }
 
     return res.status(200).json({ session });
   } catch (error) {

@@ -268,7 +268,7 @@ function SessionPage() {
                       </h2>
 
                       <ol className="space-y-4">
-                        {problem?.examples.map((example, index) => (
+                        {problem?.examples?.map((example, index) => (
                           <li key={index}>
                             <div className="mb-2">
                               <span className="badge badge-sm font-mono font-medium">
@@ -319,7 +319,7 @@ function SessionPage() {
                       </h2>
 
                       <ul className="text-base-content/90 space-y-2">
-                        {problem?.constraints.map((constraint, index) => (
+                        {problem?.constraints?.map((constraint, index) => (
                           <li key={index} className="flex items-center gap-2">
                             <span className="text-primary shrink-0">
                               &bull;
@@ -426,7 +426,7 @@ function SessionPage() {
                       selectedLanguage={selectedLanguage}
                       onLanguageChange={handleLanguageChange}
                       userCode={userCode}
-                      onCodeChange={(value) => setUserCode(value)}
+                      onUserCodeChange={(value) => setUserCode(value)}
                       isRunning={isRunning}
                       onRunCode={handleRunCode}
                     />
@@ -467,6 +467,12 @@ function SessionPage() {
                   >
                     Refresh Page
                   </button>
+                </div>
+              ) : !streamVideoClient || !call ? (
+                // Needed because on the initial render, both the objects are null
+                <div className="h-full text-center flex flex-col justify-center items-center">
+                  <Loader2 className="size-8 text-primary mx-auto mb-2 animate-spin" />
+                  <p className="text-base-content/70">Preparing call...</p>
                 </div>
               ) : (
                 <div className="h-full">

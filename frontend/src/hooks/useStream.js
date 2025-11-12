@@ -69,7 +69,7 @@ export default function useStream(
           await sessionsApi.getStreamToken();
 
         // 3. Initialize video client
-        const client = initStreamVideoClient(
+        const client = await initStreamVideoClient(
           { id: userClerkId, name: username, image: userAvatarUrl },
           streamToken
         );

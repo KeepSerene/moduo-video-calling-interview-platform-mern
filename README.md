@@ -84,7 +84,7 @@ const { streamError, hasMediaPermissions } = useStream(...);
 
 ## 🔐 Security Flow
 
-```
+```text
 User requests to join
      ↓
 Frontend: "I need a token for userX"
@@ -178,6 +178,7 @@ Think of Stream.io like a restaurant:
 
 The manager (backend) has full access, customers (frontend) only have access to their specific reservation!
 
+```mermaid
 sequenceDiagram
 participant User
 participant Frontend
@@ -251,3 +252,4 @@ participant StreamAPI
 
     Frontend->>Frontend: Navigate to /dashboard
     Frontend-->>User: Show dashboard
+```
