@@ -6,6 +6,7 @@ import {
 } from "../lib/stream";
 import { StreamChat } from "stream-chat";
 import toast from "react-hot-toast";
+import { CallingState } from "@stream-io/video-react-sdk";
 
 const accessKey = import.meta.env.VITE_STREAM_ACCESS_KEY;
 
@@ -156,14 +157,11 @@ export default function useStream(
               // check call state before attempting to leave
               const callState = videoCallRef.current.state;
 
-              if (callState && callState.callingState !== "left") {
+              if (callState && callState.callingState !== CallingState.LEFT) {
                 await videoCallRef.current.leave();
               }
             } catch (leaveError) {
-              // ignore "already left" errors
-              if (!leaveError.message?.includes("already been left")) {
-                console.error("Error leaving call:", leaveError);
-              }
+              console.error("Error leaving call:", leaveError);
             }
             videoCallRef.current = null;
           }

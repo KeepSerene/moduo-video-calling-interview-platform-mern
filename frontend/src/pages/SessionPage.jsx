@@ -198,9 +198,14 @@ function SessionPage() {
     setIsEndSessionModalOpen(true);
   };
 
-  const handleCopyUrl = () => {
-    navigator.clipboard.writeText(window.location.href);
-    toast.success("Session URL copied to clipboard!");
+  const handleCopyUrl = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      toast.success("Session URL copied to clipboard!");
+    } catch (error) {
+      console.error("Copy failed:", error);
+      toast.error("Failed to copy URL. Please copy manually.");
+    }
   };
 
   // If mobile, show desktop-only message
