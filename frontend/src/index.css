@@ -51,6 +51,13 @@
   }
 }
 
+@layer components {
+  /* Stream video call controls component's additional styles */
+  .str-video__call-controls {
+    @apply flex-wrap!;
+  }
+}
+
 @utility text-gradient {
   @apply text-transparent bg-linear-to-r bg-clip-text from-primary via-secondary to-accent capitalize;
 }

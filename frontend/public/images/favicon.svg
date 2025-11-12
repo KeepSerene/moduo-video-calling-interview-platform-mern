@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <!-- Background -->
+  <rect width="32" height="32" rx="6" fill="oklch(20.84% 0.008 17.911)"/>
+  
+  <!-- Simplified logo -->
+  <g transform="translate(16, 16)">
+    <!-- Left bracket -->
+    <path d="M -6 -8 L -8 -8 L -10 -6 L -10 6 L -8 8 L -6 8" 
+          stroke="oklch(68.628% 0.185 148.958)" 
+          stroke-width="2" 
+          stroke-linecap="round" 
+          fill="none"/>
+    
+    <!-- Right bracket -->
+    <path d="M 6 -8 L 8 -8 L 10 -6 L 10 6 L 8 8 L 6 8" 
+          stroke="oklch(68.628% 0.185 148.958)" 
+          stroke-width="2" 
+          stroke-linecap="round" 
+          fill="none"/>
+    
+    <!-- Connection -->
+    <line x1="-6" y1="0" x2="6" y2="0" 
+          stroke="oklch(68.628% 0.185 148.958)" 
+          stroke-width="2" 
+          stroke-linecap="round"/>
+    
+    <!-- Center node -->
+    <circle cx="0" cy="0" r="2" fill="oklch(68.628% 0.185 148.958)"/>
+  </g>
+</svg>

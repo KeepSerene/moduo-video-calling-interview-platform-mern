@@ -8,3 +8,5 @@ export { default as ActiveSessions } from "./ActiveSessions";
 export { default as RecentSessions } from "./RecentSessions";
 export { default as CreateSessionModal } from "./CreateSessionModal";
 export { default as CallAndChatUI } from "./CallAndChatUI";
+export { default as ConfirmationModal } from "./ConfirmationModal";
+export { default as Pagination } from "./Pagination";
