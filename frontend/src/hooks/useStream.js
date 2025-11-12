@@ -33,7 +33,12 @@ export default function useStream(
 
   useEffect(() => {
     const initCall = async () => {
-      if (!session?.callId || (!isHost && !isParticipant)) return;
+      if (
+        !session?.callId ||
+        session?.status === "completed" ||
+        (!isHost && !isParticipant)
+      )
+        return;
 
       setIsInitializingCall(true);
       setStreamError(null);
