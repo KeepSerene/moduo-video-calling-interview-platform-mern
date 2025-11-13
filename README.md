@@ -1,255 +1,527 @@
 # Moduo
 
-# Stream.io Setup - Key Takeaways & Best Practices
+> **Code together, live.** A real-time collaborative coding interview platform built with the MERN stack.
 
-## ✅ What You Got Right
+[![Live Demo](https://img.shields.io/badge/demo-live-success)](https://moduo.onrender.com/)
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 
-1. **Separation of concerns**: Backend handles privileged operations, frontend handles user-facing operations
-2. **Singleton pattern** for video client in frontend - prevents multiple connections
-3. **Using same callId** for both video call and chat channel - clean and logical
-4. **Token generation on backend** - keeps secrets secure
-5. **Refetch interval** for session data - keeps UI in sync
+## 📋 Table of Contents
 
-## 🔧 What Needs Improvement
+- [Overview](#overview)
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Architecture Overview](#architecture-overview)
+- [Application Flow](#application-flow)
+- [Prerequisites](#prerequisites)
+- [Environment Variables](#environment-variables)
+- [Installation & Setup](#installation--setup)
+- [Project Structure](#project-structure)
+- [API Endpoints](#api-endpoints)
+- [Screenshots](#screenshots)
+- [Deployment](#deployment)
+- [License](#license)
 
-### 1. **Camera/Microphone Permissions** (CRITICAL)
+---
 
-**Problem**: No handling for when user denies permissions or has no camera
+## 🎯 Overview
 
-**Solution**: Check permissions BEFORE initializing Stream
+**Moduo** is a comprehensive platform designed for conducting technical coding interviews in real-time. It combines video calling, live chat, and collaborative code editing into a single, seamless experience. Perfect for practicing DSA problems, conducting mock interviews, or hosting actual technical screenings.
 
-```javascript
-await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+---
+
+## ✨ Features
+
+- 🎥 **HD Video Calls** - Crystal-clear video and audio powered by Stream.io
+- 💬 **Real-time Chat** - Integrated messaging during interview sessions
+- 👨‍💻 **Live Code Editor** - Monaco editor with syntax highlighting for JavaScript, Python, and Java
+- ▶️ **Code Execution** - Run code directly in the browser using Piston API
+- 🔐 **Secure Authentication** - User management via Clerk
+- 📊 **Session Management** - Create, join, and manage interview sessions
+- 🎨 **Responsive Design** - Beautiful UI with TailwindCSS and DaisyUI
+- 📱 **Desktop-First** - Optimized for desktop experience (mobile redirects to copy URL)
+- 🔄 **Resizable Panels** - Flexible layout with adjustable sections
+
+---
+
+## 🛠 Tech Stack
+
+### Frontend
+
+- **React 19** - UI library
+- **Vite** - Build tool and dev server
+- **React Router 7** - Client-side routing
+- **TailwindCSS 4 + DaisyUI** - Styling framework
+- **Monaco Editor** - Code editor component
+- **Stream.io Video & Chat SDKs** - Real-time communication
+- **Clerk React** - Authentication
+- **TanStack Query** - Server state management
+- **React Hot Toast** - Notifications
+- **Lucide React** - Icons
+- **Canvas Confetti** - Success animations
+
+### Backend
+
+- **Node.js + Express** - Server framework
+- **MongoDB + Mongoose** - Database
+- **Clerk Express** - Server-side auth middleware
+- **Stream.io Node SDK** - Video/chat server operations
+- **Inngest** - Background job processing & webhooks
+- **Piston API** - Code execution service
+
+---
+
+## 🏗 Architecture Overview
+
+```
+┌─────────────┐
+│   Browser   │
+└──────┬──────┘
+       │
+       ├──── Clerk Auth ────┐
+       │                    │
+       ├──── React App      │
+       │                    ▼
+       │              ┌──────────┐
+       │              │  Clerk   │
+       │              │ (Auth)   │
+       │              └────┬─────┘
+       │                   │ Webhooks
+       ▼                   ▼
+┌─────────────────┐  ┌──────────┐
+│  Express API    │  │ Inngest  │
+│  + MongoDB      │◄─┤ (Events) │
+└────┬────────────┘  └──────────┘
+     │
+     ├── Stream.io (Video/Chat)
+     │   • Create calls/channels
+     │   • Generate tokens
+     │   • Delete resources
+     │
+     └── Piston API
+         • Execute user code
+         • Return stdout/stderr
 ```
 
-### 2. **Cleanup Function in useEffect**
+---
 
-**Problem**: Async IIFE in cleanup won't complete before component unmounts
+## 🔄 Application Flow
 
-**Solution**: Use refs to track resources and cleanup synchronously
+### 1️⃣ User Registration & Authentication
 
-```javascript
-const videoCallRef = useRef(null);
-// ... in cleanup
-if (videoCallRef.current) {
-  videoCallRef.current.leave(); // synchronous call
-}
+```
+User signs up
+    ↓
+Clerk creates account
+    ↓
+Clerk webhook → Inngest event → "clerk/user.created"
+    ↓
+Backend: Inngest function processes event
+    ↓
+MongoDB: Create User document {clerkId, name, email, profileImageUrl}
+    ↓
+Stream.io: Upsert user with chatClient.upsertUser()
+    ↓
+User can now access the app
 ```
 
-### 3. **Race Condition in Auto-Join**
+### 2️⃣ Session Creation Flow
 
-**Problem**: Multiple effect triggers could cause duplicate join attempts
-
-**Solution**: Use a ref to track join status
-
-```javascript
-const hasJoined = useRef(false);
-if (hasJoined.current) return;
-hasJoined.current = true;
+```
+Host clicks "Create Session"
+    ↓
+Frontend: POST /api/sessions {problemTitle, difficulty}
+    ↓
+Backend:
+  1. Create Session document in MongoDB
+  2. Generate unique callId
+  3. Create Stream video call with streamClient.video.call()
+  4. Create Stream chat channel with chatClient.channel()
+    ↓
+Frontend: Navigate to /sessions/:sessionId
+    ↓
+User sees session page with video call + chat + code editor
 ```
 
-### 4. **Missing Error UI States**
+### 3️⃣ Participant Joining Flow
 
-**Problem**: User sees nothing when Stream initialization fails
-
-**Solution**: Return error states from hook and display them
-
-```javascript
-const { streamError, hasMediaPermissions } = useStream(...);
-// Show error banners in UI
+```
+Participant opens session URL
+    ↓
+Frontend: GET /api/sessions/:sessionId
+    ↓
+Backend: Return session data
+    ↓
+Frontend: Check if user is host/participant
+    ↓
+If neither → POST /api/sessions/:sessionId/join
+    ↓
+Backend:
+  1. Update session.participantId in MongoDB
+  2. Add user to Stream chat channel
+    ↓
+Frontend: User can now see video + chat + code editor
 ```
 
-## 📊 Stream Architecture in Your App
+### 4️⃣ Stream Initialization (Video + Chat)
 
-### Backend Responsibilities (Server SDK)
+```
+User enters session page
+    ↓
+Frontend: GET /api/chats/token
+    ↓
+Backend: Generate token using chatClient.createToken(clerkUserId)
+    ↓
+Frontend: Initialize Stream clients
+  1. Create StreamVideoClient with token
+  2. Join video call: call.join()
+  3. Connect chat: StreamChat.connectUser()
+  4. Watch channel: channel.watch()
+    ↓
+Render CallAndChatUI component
+```
 
-- ✅ Create video calls with `streamClient.video.call().getOrCreate()`
-- ✅ Create chat channels with `chatClient.channel().create()`
-- ✅ Generate user tokens with `chatClient.createToken()`
-- ✅ Delete calls/channels with `.delete({ hard: true })`
+### 5️⃣ Code Execution Flow
+
+```
+User writes code in Monaco editor
+    ↓
+User clicks "Run"
+    ↓
+Frontend: Send code to Piston API
+  POST https://emkc.org/api/v2/piston/execute
+  {language, version, files: [{name, content}]}
+    ↓
+Piston API: Execute code in isolated container
+    ↓
+Return {stdout, stderr, output, code}
+    ↓
+Frontend: Display output in OutputPanel
+  • Success → Show output + confetti 🎉
+  • Error → Show error message
+```
+
+### 6️⃣ Session End Flow (Host Only)
+
+```
+Host clicks "End Session"
+    ↓
+Frontend: POST /api/sessions/:sessionId/end
+    ↓
+Backend:
+  1. Verify user is host
+  2. Delete Stream video call (hard delete)
+  3. Delete Stream chat channel (hard delete)
+  4. Update session.status = "completed" in MongoDB
+    ↓
+Frontend:
+  1. Leave video call: call.leave()
+  2. Disconnect chat: chatClient.disconnectUser()
+  3. Disconnect video: videoClient.disconnectUser()
+  4. Navigate to /dashboard
+```
+
+---
+
+## 📦 Prerequisites
+
+- **Node.js** >= 18.x
+- **pnpm** >= 10.x (package manager)
+- **MongoDB** (Atlas or local)
+- **Clerk Account** (for authentication)
+- **Stream.io Account** (for video/chat)
+- **Inngest Account** (for webhooks)
+
+---
+
+## 🔐 Environment Variables
+
+### Frontend (`.env`)
+
+```env
+VITE_CLERK_PUBLISHABLE_KEY=pk_test_xxxxx
+VITE_SERVER_BASE_URL=http://localhost:3000/api
+VITE_STREAM_ACCESS_KEY=xxxxx
+```
+
+### Backend (`.env`)
+
+```env
+NODE_ENV=development
+PORT=3000
+DB_URL=mongodb+srv://username:password@cluster.mongodb.net/moduo
+CLERK_PUBLISHABLE_KEY=pk_test_xxxxx
+CLERK_SECRET_KEY=sk_test_xxxxx
+INNGEST_EVENT_KEY=your-inngest-event-key
+INNGEST_SIGNING_KEY=your-inngest-signing-key
+STREAM_ACCESS_KEY=xxxxx
+STREAM_ACCESS_SECRET=xxxxx
+CLIENT_URL=http://localhost:5173
+```
+
+---
+
+## 🚀 Installation & Setup
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/KeepSerene/moduo-video-calling-interview-platform-mern.git
+cd moduo
+```
+
+### 2. Install Dependencies
+
+```bash
+
+# Install backend dependencies
+cd backend
+pnpm install
+
+# Install frontend dependencies
+cd ../frontend
+pnpm install
+```
+
+### 3. Set Up Environment Variables
+
+Create `.env` files in both `backend/` and `frontend/` directories with the variables listed above.
+
+### 4. Configure Clerk Webhooks
+
+1. Go to your Clerk dashboard
+2. Navigate to **Webhooks**
+3. Add endpoint: `https://your-domain.com/api/inngest`
+4. Subscribe to events: `user.created`, `user.deleted`
+5. Copy the webhook secret to your Inngest configuration
+
+### 5. Run the Application
+
+```bash
+# From root directory - Development mode
+cd backend
+pnpm run dev
+
+# In another terminal
+cd frontend
+pnpm run dev
+```
+
+The frontend will run on `http://localhost:5173` and backend on `http://localhost:3000`.
+
+### 6. Build for Production
+
+```bash
+# From root directory
+pnpm run build
+pnpm start
+```
+
+This builds the frontend and serves it from the backend Express server.
+
+---
+
+## 📁 Project Structure (Tentative!)
+
+```
+moduo/
+├── backend/
+│   ├── src/
+│   │   ├── controllers/
+│   │   │   ├── sessions.controller.js
+│   │   │   └── streamToken.controller.js
+│   │   ├── lib/
+│   │   │   ├── db.js
+│   │   │   ├── env.js
+│   │   │   ├── inngest.js
+│   │   │   └── stream.js
+│   │   ├── middlewares/
+│   │   │   └── protectRoute.middleware.js
+│   │   ├── models/
+│   │   │   ├── Session.js
+│   │   │   └── User.js
+│   │   ├── routes/
+│   │   │   ├── chats.route.js
+│   │   │   └── sessions.route.js
+│   │   └── server.js
+│   ├── .env
+│   └── package.json
+│
+├── frontend/
+│   ├── public/
+│   │   └── images/
+│   ├── src/
+│   │   ├── api/
+│   │   │   └── sessions.js
+│   │   ├── components/
+│   │   │   ├── CallAndChatUI.jsx
+│   │   │   ├── CodeEditor.jsx
+│   │   │   ├── ConfirmationModal.jsx
+│   │   │   ├── CreateSessionModal.jsx
+│   │   │   └── ...
+│   │   ├── data/
+│   │   │   └── problems.js
+│   │   ├── hooks/
+│   │   │   ├── useSessions.js
+│   │   │   └── useStream.js
+│   │   ├── lib/
+│   │   │   ├── axios.js
+│   │   │   ├── piston.js
+│   │   │   ├── stream.js
+│   │   │   └── utils.js
+│   │   ├── pages/
+│   │   │   ├── DashboardPage.jsx
+│   │   │   ├── HomePage.jsx
+│   │   │   ├── ProblemDetailsPage.jsx
+│   │   │   ├── ProblemsPage.jsx
+│   │   │   └── SessionPage.jsx
+│   │   ├── routes/
+│   │   │   └── index.js
+│   │   ├── App.jsx
+│   │   ├── index.css
+│   │   └── main.jsx
+│   ├── .env
+│   ├── index.html
+│   └── package.json
+│
+└── package.json
+```
+
+---
+
+## 🌐 API Endpoints
+
+### Sessions
+
+| Method | Endpoint                        | Description                | Auth Required |
+| ------ | ------------------------------- | -------------------------- | ------------- |
+| POST   | `/api/sessions`                 | Create new session         | ✅            |
+| GET    | `/api/sessions/active`          | Get all active sessions    | ✅            |
+| GET    | `/api/sessions/recent`          | Get user's recent sessions | ✅            |
+| GET    | `/api/sessions/:sessionId`      | Get session by ID          | ✅            |
+| POST   | `/api/sessions/:sessionId/join` | Join a session             | ✅            |
+| POST   | `/api/sessions/:sessionId/end`  | End a session (host only)  | ✅            |
+
+### Chat
+
+| Method | Endpoint           | Description               | Auth Required |
+| ------ | ------------------ | ------------------------- | ------------- |
+| GET    | `/api/chats/token` | Get Stream token for user | ✅            |
+
+### Webhooks
+
+| Method | Endpoint       | Description                               |
+| ------ | -------------- | ----------------------------------------- |
+| POST   | `/api/inngest` | Inngest webhook endpoint for Clerk events |
+
+---
+
+## 📸 Screenshots
+
+### Dashboard
+
+![Dashboard](./frontend/public/moduo-dashboard.png "Moduo Dashboard Page Desktop View")
+
+### Session Page
+
+![Session Page](./frontend/public/moduo-session.png "Moduo Session Page Desktop View")
+
+---
+
+## 🚢 Deployment
+
+### Deploy to Render.com
+
+1. **Create a Web Service**
+
+   - Connect your GitHub repository
+   - Root directory: `.`
+   - Build command: `pnpm run build`
+   - Start command: `pnpm start`
+
+2. **Add Environment Variables**
+
+   - Add all backend environment variables in Render dashboard
+   - Set `NODE_ENV=production`
+   - Set `CLIENT_URL` to your Render URL
+
+3. **Update Clerk Webhook**
+
+   - Update webhook URL to `https://your-app.onrender.com/api/inngest`
+
+4. **MongoDB Atlas**
+   - Whitelist Render's IP addresses or use `0.0.0.0/0` for development
+   - Update `DB_URL` in environment variables
+
+---
+
+## 🔑 Key Technologies Explained
+
+### Stream.io Architecture
+
+**Backend (Server SDK) - With API Secret:**
+
+- ✅ Create video calls and chat channels
+- ✅ Generate user tokens
+- ✅ Delete calls/channels (hard delete)
 - ✅ Add members to channels
 
-**Why backend?** Requires API secret - never expose to browser!
+**Frontend (Client SDK) - With User Token:**
 
-### Frontend Responsibilities (Client SDK)
-
-- ✅ Connect user to video client with token
+- ✅ Connect user to video client
 - ✅ Join existing video calls
-- ✅ Connect user to chat with token
+- ✅ Connect user to chat
 - ✅ Watch chat channels
 - ✅ Render video/chat UI
-- ✅ Leave calls on cleanup
 
-**Why frontend?** User-scoped operations with limited token
+**Security Flow:**
 
-## 🔐 Security Flow
-
-```text
-User requests to join
-     ↓
-Frontend: "I need a token for userX"
-     ↓
-Backend: Verifies user with Clerk → Generates Stream token → Returns token
-     ↓
-Frontend: Uses token to connect to Stream (video + chat)
-     ↓
-Stream API: Validates token → Allows connection
+```
+User → Request token → Backend verifies with Clerk
+  ↓
+Backend generates Stream token with chatClient.createToken()
+  ↓
+Frontend uses token to connect to Stream
+  ↓
+Stream validates token → Allows connection
 ```
 
-**Key insight**: Token is short-lived and user-specific, generated fresh for each session
+### Inngest Integration
 
-## 🎯 Best Practices Applied
+Inngest handles asynchronous events from Clerk webhooks:
 
-### Error Handling Strategy
+1. **User Created**: `clerk/user.created`
 
-```javascript
-// ✅ GOOD: Specific, actionable messages
-toast.error("Camera access denied. Please enable in browser settings.");
+   - Creates MongoDB user document
+   - Upserts Stream.io user profile
 
-// ❌ BAD: Generic, unhelpful
-toast.error("Failed to join call");
-```
+2. **User Deleted**: `clerk/user.deleted`
+   - Removes MongoDB user document
+   - Deletes Stream.io user profile
 
-### Cleanup Pattern
+This ensures user data stays synchronized across all services.
 
-```javascript
-// ✅ GOOD: Use refs for async resources
-const resourceRef = useRef(null);
-return () => {
-  cleanup(); // sync function that handles async
-};
+---
 
-// ❌ BAD: Async IIFE in cleanup
-return () => {
-  (async () => {
-    await cleanup();
-  })(); // won't complete!
-};
-```
+## 📄 License
 
-### Permission Checking
+This project is licensed under the Apache 2.0 License.
 
-```javascript
-// ✅ GOOD: Check BEFORE initializing
-try {
-  await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-  // Proceed with Stream initialization
-} catch (error) {
-  // Handle gracefully - offer audio-only mode
-}
+---
 
-// ❌ BAD: Let Stream fail and hope for the best
-```
+## 👨‍💻 Author
 
-## 🧪 Testing Scenarios to Cover
+**Dhrubajyoti Bhattacharjee**
 
-1. **No camera connected**: Should allow audio-only
-2. **Camera permission denied**: Should show clear error with instructions
-3. **Network disconnect**: Should handle reconnection gracefully
-4. **Host ends session**: Participant should be notified and redirected
-5. **Participant leaves**: Host should see updated participant count
-6. **Multiple tabs**: Should prevent duplicate connections
+---
 
-## 📝 Recommended Next Steps
+## 🙏 Acknowledgments
 
-1. **Add device selection UI**: Let users choose camera/microphone
-2. **Add reconnection logic**: Handle temporary network drops
-3. **Add screen sharing**: Stream supports this out of the box
-4. **Add recording**: Stream can record calls server-side
-5. **Add presence indicators**: Show when users are typing in chat
-6. **Add call quality indicators**: Stream provides network quality stats
+- [Stream.io](https://getstream.io/) - Video and chat infrastructure
+- [Clerk](https://clerk.com/) - Authentication
+- [Piston](https://github.com/engineer-man/piston) - Code execution engine
+- [Inngest](https://www.inngest.com/) - Background jobs
+- [Monaco Editor](https://microsoft.github.io/monaco-editor/) - Code editor
 
-## 💡 Common Pitfalls to Avoid
+---
 
-1. **Don't create new client on every render**: Use singleton pattern
-2. **Don't forget to cleanup**: Always leave calls and disconnect users
-3. **Don't expose API secret**: Only use it on backend
-4. **Don't assume camera exists**: Always check permissions first
-5. **Don't ignore Stream events**: They provide useful info (user joined, left, etc.)
-
-## 🎓 Mental Model
-
-Think of Stream.io like a restaurant:
-
-- **Backend (Server SDK)**: The manager who creates reservations (calls/channels) and gives out keys (tokens)
-- **Frontend (Client SDK)**: The customer who uses their key (token) to enter and participate
-- **Stream API**: The restaurant building that validates keys and provides the space
-- **Token**: Your reservation confirmation - proves you're allowed to be there
-
-The manager (backend) has full access, customers (frontend) only have access to their specific reservation!
-
-```mermaid
-sequenceDiagram
-participant User
-participant Frontend
-participant Backend
-participant MongoDB
-participant StreamAPI
-
-    Note over User,StreamAPI: 1. SESSION CREATION (Host)
-
-    User->>Frontend: Click "Create Session"
-    Frontend->>Backend: POST /api/sessions
-    Backend->>MongoDB: Create Session document
-    Backend->>StreamAPI: Create video call (with secret)
-    Backend->>StreamAPI: Create chat channel (with secret)
-    Backend-->>Frontend: Return session data
-    Frontend-->>User: Show session created
-
-    Note over User,StreamAPI: 2. SESSION JOIN (Participant)
-
-    User->>Frontend: Navigate to /sessions/:id
-    Frontend->>Backend: GET /api/sessions/:id
-    Backend->>MongoDB: Fetch session
-    Backend-->>Frontend: Return session data
-
-    Frontend->>Frontend: Check if user is host/participant
-
-    alt User is neither host nor participant
-        Frontend->>Backend: POST /api/sessions/:id/join
-        Backend->>MongoDB: Update session.participantId
-        Backend->>StreamAPI: Add user to chat channel
-        Backend-->>Frontend: Return updated session
-    end
-
-    Note over User,StreamAPI: 3. STREAM INITIALIZATION
-
-    Frontend->>Backend: GET /api/chats/token
-    Note over Backend: Generate token with<br/>user's Clerk ID using<br/>chatClient.createToken()
-    Backend-->>Frontend: Return { streamToken, userClerkId, username, avatar }
-
-    Frontend->>Frontend: initStreamVideoClient(user, token)
-    Note over Frontend: Store videoClient in memory<br/>(singleton pattern)
-
-    Frontend->>StreamAPI: Connect video client
-    StreamAPI-->>Frontend: Video client connected
-
-    Frontend->>StreamAPI: call.join({ create: true })
-    Note over Frontend,StreamAPI: Join video call using callId<br/>from session
-    StreamAPI-->>Frontend: Joined video call
-
-    Frontend->>StreamAPI: StreamChat.connectUser(user, token)
-    StreamAPI-->>Frontend: Chat user connected
-
-    Frontend->>StreamAPI: channel.watch()
-    Note over Frontend,StreamAPI: Watch chat channel using<br/>same callId as channel ID
-    StreamAPI-->>Frontend: Channel ready
-
-    Frontend-->>User: Show video call + chat UI
-
-    Note over User,StreamAPI: 4. SESSION END (Host only)
-
-    User->>Frontend: Click "End Session"
-    Frontend->>Backend: POST /api/sessions/:id/end
-    Backend->>StreamAPI: Delete video call (hard delete)
-    Backend->>StreamAPI: Delete chat channel (hard delete)
-    Backend->>MongoDB: Update session.status = "completed"
-    Backend-->>Frontend: Session ended
-
-    Frontend->>StreamAPI: call.leave()
-    Frontend->>StreamAPI: chatClient.disconnectUser()
-    Frontend->>Frontend: videoClient.disconnectUser()
-
-    Frontend->>Frontend: Navigate to /dashboard
-    Frontend-->>User: Show dashboard
-```
+**Made with ❤️ for the developer community**
