@@ -34,14 +34,14 @@
 
 ## ✨ Features
 
-- 🎥 **HD Video Calls** - Crystal-clear video and audio powered by Stream.io
+- 🎥 **HD Video Calls** - Crystal-clear video and audio powered by GetStream.io
 - 💬 **Real-time Chat** - Integrated messaging during interview sessions
 - 👨‍💻 **Live Code Editor** - Monaco editor with syntax highlighting for JavaScript, Python, and Java
 - ▶️ **Code Execution** - Run code directly in the browser using Piston API
 - 🔐 **Secure Authentication** - User management via Clerk
 - 📊 **Session Management** - Create, join, and manage interview sessions
 - 🎨 **Responsive Design** - Beautiful UI with TailwindCSS and DaisyUI
-- 📱 **Desktop-First** - Optimized for desktop experience (mobile redirects to copy URL)
+- 📱 **Desktop-First** - Optimized for desktop experience
 - 🔄 **Resizable Panels** - Flexible layout with adjustable sections
 
 ---
@@ -55,7 +55,7 @@
 - **React Router 7** - Client-side routing
 - **TailwindCSS 4 + DaisyUI** - Styling framework
 - **Monaco Editor** - Code editor component
-- **Stream.io Video & Chat SDKs** - Real-time communication
+- **GetStream.io Video & Chat SDKs** - Real-time communication
 - **Clerk React** - Authentication
 - **TanStack Query** - Server state management
 - **React Hot Toast** - Notifications
@@ -67,7 +67,7 @@
 - **Node.js + Express** - Server framework
 - **MongoDB + Mongoose** - Database
 - **Clerk Express** - Server-side auth middleware
-- **Stream.io Node SDK** - Video/chat server operations
+- **GetStream.io Node SDK** - Video/chat server operations
 - **Inngest** - Background job processing & webhooks
 - **Piston API** - Code execution service
 
@@ -165,7 +165,7 @@ Backend:
 Frontend: User can now see video + chat + code editor
 ```
 
-### 4️⃣ Stream Initialization (Video + Chat)
+### 4️⃣ GetStream Initialization (Video + Chat)
 
 ```
 User enters session page
@@ -174,7 +174,7 @@ Frontend: GET /api/chats/token
     ↓
 Backend: Generate token using chatClient.createToken(clerkUserId)
     ↓
-Frontend: Initialize Stream clients
+Frontend: Initialize GetStream clients
   1. Create StreamVideoClient with token
   2. Join video call: call.join()
   3. Connect chat: StreamChat.connectUser()
@@ -212,8 +212,8 @@ Frontend: POST /api/sessions/:sessionId/end
     ↓
 Backend:
   1. Verify user is host
-  2. Delete Stream video call (hard delete)
-  3. Delete Stream chat channel (hard delete)
+  2. Delete GetStream video call (hard delete)
+  3. Delete GetStream chat channel (hard delete)
   4. Update session.status = "completed" in MongoDB
     ↓
 Frontend:
@@ -231,7 +231,7 @@ Frontend:
 - **pnpm** >= 10.x (package manager)
 - **MongoDB** (Atlas or local)
 - **Clerk Account** (for authentication)
-- **Stream.io Account** (for video/chat)
+- **GetStream.io Account** (for video/chat)
 - **Inngest Account** (for webhooks)
 
 ---
@@ -406,9 +406,9 @@ moduo/
 
 ### Chat
 
-| Method | Endpoint           | Description               | Auth Required |
-| ------ | ------------------ | ------------------------- | ------------- |
-| GET    | `/api/chats/token` | Get Stream token for user | ✅            |
+| Method | Endpoint           | Description                  | Auth Required |
+| ------ | ------------------ | ---------------------------- | ------------- |
+| GET    | `/api/chats/token` | Get GetStream token for user | ✅            |
 
 ### Webhooks
 
@@ -459,7 +459,7 @@ moduo/
 
 ## 🔑 Key Technologies Explained
 
-### Stream.io Architecture
+### GetStream.io Architecture
 
 **Backend (Server SDK) - With API Secret:**
 
@@ -481,11 +481,11 @@ moduo/
 ```
 User → Request token → Backend verifies with Clerk
   ↓
-Backend generates Stream token with chatClient.createToken()
+Backend generates GetStream token with chatClient.createToken()
   ↓
 Frontend uses token to connect to Stream
   ↓
-Stream validates token → Allows connection
+GetStream validates token → Allows connection
 ```
 
 ### Inngest Integration
@@ -495,11 +495,11 @@ Inngest handles asynchronous events from Clerk webhooks:
 1. **User Created**: `clerk/user.created`
 
    - Creates MongoDB user document
-   - Upserts Stream.io user profile
+   - Upserts GetStream.io user profile
 
 2. **User Deleted**: `clerk/user.deleted`
    - Removes MongoDB user document
-   - Deletes Stream.io user profile
+   - Deletes GetStream.io user profile
 
 This ensures user data stays synchronized across all services.
 
@@ -519,7 +519,7 @@ This project is licensed under the Apache 2.0 License.
 
 ## 🙏 Acknowledgments
 
-- [Stream.io](https://getstream.io/) - Video and chat infrastructure
+- [GetStream.io](https://getstream.io/) - Video and chat infrastructure
 - [Clerk](https://clerk.com/) - Authentication
 - [Piston](https://github.com/engineer-man/piston) - Code execution engine
 - [Inngest](https://www.inngest.com/) - Background jobs
