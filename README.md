@@ -7,19 +7,22 @@
 
 ## 📋 Table of Contents
 
-- [Overview](#overview)
-- [Features](#features)
-- [Tech Stack](#tech-stack)
-- [Architecture Overview](#architecture-overview)
-- [Application Flow](#application-flow)
-- [Prerequisites](#prerequisites)
-- [Environment Variables](#environment-variables)
-- [Installation & Setup](#installation--setup)
-- [Project Structure](#project-structure)
-- [API Endpoints](#api-endpoints)
-- [Screenshots](#screenshots)
-- [Deployment](#deployment)
-- [License](#license)
+- [Overview](#-overview)
+- [Features](#-features)
+- [Tech Stack](#-tech-stack)
+- [Architecture Overview](#-architecture-overview)
+- [Application Flow](#-application-flow)
+- [Prerequisites](#-prerequisites)
+- [Environment Variables](#-environment-variables)
+- [Installation & Setup](#-installation--setup)
+- [Project Structure](#-project-structure)
+- [API Endpoints](#-api-endpoints)
+- [Screenshots](#-screenshots)
+- [Deployment](#-deployment)
+- [Key Technologies Explained](#-key-technologies-explained)
+- [License](#-license)
+- [Author](#-author)
+- [Acknowledgments](#-acknowledgments)
 
 ---
 
