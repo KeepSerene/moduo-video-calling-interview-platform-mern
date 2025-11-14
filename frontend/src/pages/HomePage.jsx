@@ -262,12 +262,12 @@ const HomePage = () => (
 
               <li>
                 <a
-                  href="https://github.com/KeepSerene/moduo"
+                  href="https://math-to-dev.vercel.app/"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-base-content/70 transition-colors duration-200 hover:text-primary focus-visible:text-primary"
                 >
-                  GitHub
+                  Portfolio
                 </a>
               </li>
             </ul>
