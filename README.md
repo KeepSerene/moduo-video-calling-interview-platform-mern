@@ -21,7 +21,7 @@
 - [Deployment](#-deployment)
 - [Key Technologies Explained](#-key-technologies-explained)
 - [License](#-license)
-- [Author](#-author)
+- [Author](#author)
 - [Acknowledgments](#-acknowledgments)
 
 ---
@@ -511,7 +511,7 @@ This project is licensed under the Apache 2.0 License.
 
 ---
 
-## 👨‍💻 Author
+## Author 👨‍💻
 
 **Dhrubajyoti Bhattacharjee**
 
