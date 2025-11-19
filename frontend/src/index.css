@@ -13,6 +13,7 @@
 @layer base {
   html {
     color-scheme: dark;
+    scroll-behavior: smooth;
   }
 
   button:not(:disabled),
@@ -28,21 +29,6 @@
   body {
     @apply bg-base-100 font-sans text-base-content text-base;
     @apply selection:bg-primary/20;
-
-    scrollbar-width: thin;
-  }
-
-  ::-webkit-scrollbar {
-    width: 8px;
-  }
-
-  ::-webkit-scrollbar-track {
-    background-color: oklch(20.84% 0.008 17.911);
-  }
-
-  ::-webkit-scrollbar-thumb {
-    background-color: oklch(83.768% 0.001 17.911);
-    @apply rounded;
   }
 
   code,

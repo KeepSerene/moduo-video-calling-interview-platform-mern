@@ -4,6 +4,7 @@ import {
   Check,
   Code2,
   CodeSquare,
+  Layers,
   Sparkles,
   Users2,
   Video,
@@ -105,10 +106,8 @@ const HomePage = () => (
           </h1>
 
           <p className="max-w-xl text-base-content/70 text-sm sm:text-base md:text-lg lg:text-xl leading-relaxed">
-            Moduo brings together real-time video calls, collaborative coding,
-            and chat powered by GetStream — a complete, modular platform for
-            engineers to practice, conduct, or experience technical interviews
-            like never before.
+            Real-time video, collaborative coding, and chat for seamless
+            technical interviews. Powered by GetStream.
           </p>
 
           {/* Feature badges */}
@@ -128,7 +127,7 @@ const HomePage = () => (
             )}
           </ul>
 
-          {/* CTA buttons */}
+          {/* CTA */}
           <div className="flex flex-col xs:flex-row flex-wrap gap-3 sm:gap-4">
             <SignInButton mode="modal">
               <button
@@ -142,16 +141,15 @@ const HomePage = () => (
               </button>
             </SignInButton>
 
-            <button
-              type="button"
-              disabled
-              className="btn btn-outline btn-sm sm:btn-md lg:btn-lg gap-2"
+            <a
+              href="#features"
+              className="btn btn-primary btn-outline btn-sm sm:btn-md lg:btn-lg gap-2"
             >
-              <Video className="size-4 sm:size-5" />
-              <span className="capitalize text-xs sm:text-sm lg:text-base">
-                Watch demo (TBA)
+              <Layers className="size-4 sm:size-5" />
+              <span className="text-xs sm:text-sm lg:text-base">
+                View Features
               </span>
-            </button>
+            </a>
           </div>
 
           {/* Stats */}
@@ -185,7 +183,10 @@ const HomePage = () => (
     </section>
 
     {/* Features section */}
-    <section className="max-w-7xl px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-20 lg:py-24 mx-auto">
+    <section
+      id="features"
+      className="max-w-7xl px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-20 lg:py-24 mx-auto"
+    >
       <div className="text-center mb-10 sm:mb-12 lg:mb-16">
         <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold capitalize mb-3 sm:mb-4">
           Where <span className="text-primary font-mono">coders</span> click
