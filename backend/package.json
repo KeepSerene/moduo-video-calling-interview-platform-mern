@@ -17,7 +17,7 @@
     "@stream-io/node-sdk": "^0.7.17",
     "cors": "^2.8.5",
     "express": "^5.1.0",
-    "inngest": "^3.44.5",
+    "inngest": "^3.54.0",
     "mongoose": "^8.19.2",
     "stream-chat": "^9.25.0"
   }
